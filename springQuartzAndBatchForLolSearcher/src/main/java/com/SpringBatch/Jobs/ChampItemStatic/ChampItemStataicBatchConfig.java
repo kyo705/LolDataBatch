@@ -14,9 +14,11 @@ import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import com.SpringBatch.Entity.Match;
 
+@Configuration
 public class ChampItemStataicBatchConfig {
 	EntityManagerFactory emf;
 	JobBuilderFactory jbf;
@@ -39,7 +41,7 @@ public class ChampItemStataicBatchConfig {
 	}
 
 	@Bean
-	private Step champItemStaticStep() {
+	public Step champItemStaticStep() {
 		return sbf.get("champItemStaticStep")
 				.<Match,Match>chunk(chunckSize)
 				.reader(ChampItemJpaPagingItemReader(null,null))
@@ -49,7 +51,7 @@ public class ChampItemStataicBatchConfig {
 	
 	@Bean
 	@StepScope
-	private JpaPagingItemReader<Match> ChampItemJpaPagingItemReader(
+	public JpaPagingItemReader<Match> ChampItemJpaPagingItemReader(
 			@Value("#{jobParameters[currentTimeStamp]}")Long currentTimeStamp,
 			@Value("#{jobParameters[queueId]}")Long queueId) {
 		
@@ -72,7 +74,7 @@ public class ChampItemStataicBatchConfig {
 	}
 	
 	@Bean
-	private ChampItemJpaItemWriter champItemJpaItemWriter(){
+	public ChampItemJpaItemWriter champItemJpaItemWriter(){
 		ChampItemJpaItemWriter itemWriter = new ChampItemJpaItemWriter();
 		itemWriter.setEntityManagerFactory(emf);
 		

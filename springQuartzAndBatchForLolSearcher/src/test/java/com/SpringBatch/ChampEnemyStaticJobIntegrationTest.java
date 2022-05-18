@@ -2,6 +2,9 @@ package com.SpringBatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
@@ -13,12 +16,17 @@ import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.SpringBatch.Entity.Match;
+import com.SpringBatch.Entity.Member;
+import com.SpringBatch.Entity.MemberCompKey;
+import com.SpringBatch.Entity.Champion.ChampionEnemy.ChampEnemy;
 import com.SpringBatch.Jobs.ChampEnemyStatic.ChampEnemyStaticBatchConfig;
 import com.SpringBatch.repository.ChampEnemyRepository;
 import com.SpringBatch.repository.MatchRepository;
 
+@ActiveProfiles("test")
 @SpringBatchTest
 @SpringBootTest(classes= {ChampEnemyStaticBatchConfig.class, TestBatchConfig.class})
 public class ChampEnemyStaticJobIntegrationTest {
@@ -45,21 +53,106 @@ public class ChampEnemyStaticJobIntegrationTest {
     
     @Test
     public void testChampEnemyStaticJob() throws Exception {
+    	
     	//given
     	Match match1 = new Match();
+    	match1.setMatchId("600");
+    	match1.setQueueId(420);
+    	match1.setGameEndTimestamp(System.currentTimeMillis()-300);
+    	for(int i=0;i<10;i++) {
+    		match1.getMembers().add(new Member());
+    	}
+    	for(int i=0;i<10;i++) {
+    		match1.getMembers().get(i).setCk(new MemberCompKey(i+"400", match1.getMatchId()));
+    		match1.getMembers().get(i).setMatch(match1);
+    		if(i<5) 
+    			match1.getMembers().get(i).setWins(true);
+    		else 
+    			match1.getMembers().get(i).setWins(false);
+    	}
+    	match1.getMembers().get(0).setChampionid("탈론");  		
+    	match1.getMembers().get(1).setChampionid("그레이브즈");
+    	match1.getMembers().get(2).setChampionid("카타리나");
+    	match1.getMembers().get(3).setChampionid("케이틀린");
+    	match1.getMembers().get(4).setChampionid("나미");
+    	match1.getMembers().get(5).setChampionid("오른");
+    	match1.getMembers().get(6).setChampionid("니달리");
+    	match1.getMembers().get(7).setChampionid("제드");
+    	match1.getMembers().get(8).setChampionid("징크스");
+    	match1.getMembers().get(9).setChampionid("알리스타");
+    	
+    	match1.getMembers().get(0).setPositions("TOP");
+    	match1.getMembers().get(1).setPositions("JUNGLE");
+    	match1.getMembers().get(2).setPositions("MIDDLE");
+    	match1.getMembers().get(3).setPositions("BOTTOM");
+    	match1.getMembers().get(4).setPositions("UTILITY");
+    	match1.getMembers().get(5).setPositions("TOP");
+    	match1.getMembers().get(6).setPositions("JUNGLE");
+    	match1.getMembers().get(7).setPositions("MIDDLE");
+    	match1.getMembers().get(8).setPositions("BOTTOM");
+    	match1.getMembers().get(9).setPositions("UTILITY");
+    	
     	Match match2 = new Match();
+    	match2.setMatchId("700");
+    	match2.setQueueId(420);
+    	match2.setGameEndTimestamp(System.currentTimeMillis()-200);
+    	List<Member> members2 = match2.getMembers();
+    	for(int i=0;i<10;i++) {
+    		members2.add(new Member());
+    	}
+    	for(int i=0;i<10;i++) {
+    		members2.get(i).setCk(new MemberCompKey(i+"300", match2.getMatchId()));
+    		members2.get(i).setMatch(match2);
+    		if(i<5) 
+    			members2.get(i).setWins(true);
+    		else 
+    			members2.get(i).setWins(false);
+    	}
+    	members2.get(0).setChampionid("탈론");  		
+    	members2.get(1).setChampionid("그레이브즈");
+    	members2.get(2).setChampionid("카타리나");
+    	members2.get(3).setChampionid("케이틀린");
+    	members2.get(4).setChampionid("나미");
+    	members2.get(5).setChampionid("오른");
+    	members2.get(6).setChampionid("카직스");
+    	members2.get(7).setChampionid("오리아나");
+    	members2.get(8).setChampionid("징크스");
+    	members2.get(9).setChampionid("알리스타");
+    	
+    	members2.get(0).setPositions("TOP");
+    	members2.get(1).setPositions("JUNGLE");
+    	members2.get(2).setPositions("MIDDLE");
+    	members2.get(3).setPositions("BOTTOM");
+    	members2.get(4).setPositions("UTILITY");
+    	members2.get(5).setPositions("TOP");
+    	members2.get(6).setPositions("JUNGLE");
+    	members2.get(7).setPositions("MIDDLE");
+    	members2.get(8).setPositions("BOTTOM");
+    	members2.get(9).setPositions("UTILITY");
+    	for(int i=0;i<10;i++) {
+    		System.out.println(match1.getMembers().get(i).getChampionid()+" "+match1.getMatchId()+" "+match1.getMembers().get(i).getCk().getSummonerid());
+    	}
+    	
     	matchRepository.save(match1);
     	matchRepository.save(match2);
     	
     	JobParameters jobParameters = new JobParametersBuilder()
-    			.addLong("currentTimeStamp", null)
+    			.addLong("currentTimeStamp", System.currentTimeMillis())
     	    	.addLong("queueId", 420L)
     	    	.toJobParameters();
+    	
     	
     	//when
     	JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
     	
+    	
     	//then
     	assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
+    	
+    	List<ChampEnemy> champEnemys = champEnemyRepository.findAll();
+    	for(ChampEnemy champEnemy : champEnemys) {
+    		System.out.println(champEnemy.getCk().getChampionId() + " " + champEnemy.getCk().getEnemychampionId() + " "
+    	+ champEnemy.getWins()+"/"+champEnemy.getLosses());
+    	}
     }
 }

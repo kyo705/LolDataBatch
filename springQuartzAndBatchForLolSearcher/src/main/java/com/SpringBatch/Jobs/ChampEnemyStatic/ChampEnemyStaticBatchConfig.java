@@ -9,13 +9,16 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import com.SpringBatch.Entity.Match;
 
+@Configuration
 public class ChampEnemyStaticBatchConfig {
 
 	EntityManagerFactory emf;
@@ -32,23 +35,24 @@ public class ChampEnemyStaticBatchConfig {
 	}
 	
 	@Bean
-	public Job champItemStaticJob() {
+	public Job champEnemyStaticJob() {
 		return jbf.get("champEnemyStaticJob")
-				.start(champItemStaticStep())
+				.start(champEnemyStaticStep())
 				.build();
 	}
 
 	@Bean
-	private Step champItemStaticStep() {
+	public Step champEnemyStaticStep() {
 		return sbf.get("champEnemyStaticStep")
 				.<Match,Match>chunk(chunckSize)
-				.reader(champEnemyJpaPagingItemReader(null,null))
+				.reader(champEnemyJpaPagingItemReader(null, null))
 				.writer(champEnemyJpaItemWriter())
 				.build();
 	}
 
 	@Bean
-	private JpaPagingItemReader<Match> champEnemyJpaPagingItemReader(
+	@StepScope
+	public JpaPagingItemReader<Match> champEnemyJpaPagingItemReader(
 			@Value("#{jobParameters[currentTimeStamp]}")Long currentTimeStamp,
 			@Value("#{jobParameters[queueId]}")Long queueId) {
 		
@@ -65,13 +69,13 @@ public class ChampEnemyStaticBatchConfig {
 				.pageSize(chunckSize)
 				.queryString("SELECT DISTINCT m FROM Match m join fetch m.members "
 						+ "WHERE (m.gameEndTimestamp BETWEEN :startDatetime AND :endDatetime) "
-						+ "AND m.queueId = :queueId ")
+						+ "AND m.queueId = :queueId")
 				.parameterValues(parameters)
 				.build();
 	}
 	
 	@Bean
-	private champEnemyJpaItemWriter champEnemyJpaItemWriter() {
+	public champEnemyJpaItemWriter champEnemyJpaItemWriter() {
 		champEnemyJpaItemWriter itemWriter = new champEnemyJpaItemWriter();
 		itemWriter.setEntityManagerFactory(emf);
 		return itemWriter;

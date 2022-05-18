@@ -55,7 +55,7 @@ public class Member {
 	private int item6;
 	
 	@MapsId("matchid") //MemberCompKey.matchid 필드 매핑
-	@ManyToOne(fetch = FetchType.LAZY) //lazy 패치로 두는 이유는 mostchamp에서 Member 테이블만 사용하기 때문
+	@ManyToOne(fetch = FetchType.EAGER) //lazy 패치로 두는 이유는 mostchamp에서 Member 테이블만 사용하기 때문
 	@JoinColumn(name = "MATCH_ID")
 	private Match match;
 	

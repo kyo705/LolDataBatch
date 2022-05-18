@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/summonersinfo?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
+    username: root
+    password: lsk940705
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+  quartz:
+    jdbc:
+      initialize-schema: always
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update

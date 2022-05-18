@@ -15,7 +15,7 @@ import javax.persistence.Table;
 public class Match {
 
 	@Id
-	@Column(name = "MATCH_ID")
+	@Column(name = "id")
 	private String matchid;
 	private long gameDuration;
 	private long gameEndTimestamp;
@@ -24,7 +24,7 @@ public class Match {
 	
 	//Member Entity의 특정 필드명, 패치전략 default값이 lazy이기 때문에 따로 설정 안함.
 	//Match하나에 10개의 Member가 들어가기 때문에 ArrayList size를 default값(size : 10)으로 사용
-	@OneToMany(mappedBy = "match", cascade = CascadeType.PERSIST) 
+	@OneToMany(mappedBy = "match", cascade = CascadeType.ALL) 
 	private List<Member> members = new ArrayList<>();
 	
 	

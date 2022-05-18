@@ -57,7 +57,7 @@ public class ChampStaticBatchConfig {
 
 	@Bean
 	@StepScope
-	private JpaPagingItemReader<Object> matchJpaPagingItemReader(
+	public JpaPagingItemReader<Object> matchJpaPagingItemReader(
 			@Value("#{jobParameters[currentTimeStamp]}")Long currentTimeStamp,
 			@Value("#{jobParameters[queueId]}")Integer queueId) {
 		
@@ -82,7 +82,7 @@ public class ChampStaticBatchConfig {
 	}
 
 	@Bean
-	private ItemProcessor<Object, Champion> matchToChampProcessor() {
+	public ItemProcessor<Object, Champion> matchToChampProcessor() {
 		return items ->{
 			Champion champion = new Champion();
 			

@@ -6,31 +6,41 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
-import com.SpringBatch.Entity.Champion.ChampionCompKey;
-
 @Embeddable
 public class ChampPositionCompKey implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	private ChampionCompKey championCk;
+	
+	@Column(name = "CHAMPION_ID")
+	private String championId;
+	@Column(name = "SEASON_ID")
+	private String seasonId;
 	@Column(name = "POSITION")
 	private String position;
 	
 	public ChampPositionCompKey() {}
-
-	public ChampPositionCompKey(ChampionCompKey championCk, String position) {
+	
+	public ChampPositionCompKey(String championId, String seasonId, String position) {
 		super();
-		this.championCk = championCk;
+		this.championId = championId;
+		this.seasonId = seasonId;
 		this.position = position;
 	}
 
-	public ChampionCompKey getChampionCk() {
-		return championCk;
+	public String getChampionId() {
+		return championId;
 	}
 
-	public void setChampionCk(ChampionCompKey championCk) {
-		this.championCk = championCk;
+	public void setChampionId(String championId) {
+		this.championId = championId;
+	}
+
+	public String getSeasonId() {
+		return seasonId;
+	}
+
+	public void setSeasonId(String seasonId) {
+		this.seasonId = seasonId;
 	}
 
 	public String getPosition() {
@@ -43,7 +53,7 @@ public class ChampPositionCompKey implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(championCk, position);
+		return Objects.hash(championId, position, seasonId);
 	}
 
 	@Override
@@ -55,7 +65,8 @@ public class ChampPositionCompKey implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		ChampPositionCompKey other = (ChampPositionCompKey) obj;
-		return Objects.equals(championCk, other.championCk) && Objects.equals(position, other.position);
+		return Objects.equals(championId, other.championId) && Objects.equals(position, other.position)
+				&& Objects.equals(seasonId, other.seasonId);
 	}
 
 }
