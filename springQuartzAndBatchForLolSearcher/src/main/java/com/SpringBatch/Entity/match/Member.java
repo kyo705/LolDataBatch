@@ -1,4 +1,4 @@
-package com.SpringBatch.Entity;
+package com.SpringBatch.Entity.match;
 
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;

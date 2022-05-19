@@ -14,14 +14,13 @@ public class ChampionCompKey implements Serializable {
 	@Column(name = "CHAMPION_ID")
 	private String championId;
 	@Column(name = "SEASON_ID")
-	private String seasonId;
+	private int seasonId;
 	@Column(name = "POSITION")
 	private String position;
 
 	public ChampionCompKey() {}
 
-	public ChampionCompKey(String championId, String seasonId, String position) {
-		super();
+	public ChampionCompKey(String championId, int seasonId, String position) {
 		this.championId = championId;
 		this.seasonId = seasonId;
 		this.position = position;
@@ -35,11 +34,11 @@ public class ChampionCompKey implements Serializable {
 		this.championId = championId;
 	}
 
-	public String getSeasonId() {
+	public int getSeasonId() {
 		return seasonId;
 	}
 
-	public void setSeasonId(String seasonId) {
+	public void setSeasonId(int seasonId) {
 		this.seasonId = seasonId;
 	}
 
@@ -66,7 +65,6 @@ public class ChampionCompKey implements Serializable {
 			return false;
 		ChampionCompKey other = (ChampionCompKey) obj;
 		return Objects.equals(championId, other.championId) && Objects.equals(position, other.position)
-				&& Objects.equals(seasonId, other.seasonId);
+				&& seasonId == other.seasonId;
 	}
-	
 }

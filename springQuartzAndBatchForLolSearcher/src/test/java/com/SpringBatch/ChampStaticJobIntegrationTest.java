@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -18,18 +17,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.SpringBatch.Entity.Champion.ChampionItem.ChampItem;
+import com.SpringBatch.Entity.Champion.Champion;
 import com.SpringBatch.Entity.match.Match;
 import com.SpringBatch.Entity.match.Member;
 import com.SpringBatch.Entity.match.MemberCompKey;
-import com.SpringBatch.Jobs.ChampItemStatic.ChampItemStataicBatchConfig;
-import com.SpringBatch.repository.ChampItemRepository;
+import com.SpringBatch.Jobs.ChampStatic.ChampStaticBatchConfig;
+import com.SpringBatch.repository.ChampionRepository;
 import com.SpringBatch.repository.MatchRepository;
 
 @ActiveProfiles("test")
 @SpringBatchTest
-@SpringBootTest(classes= {ChampItemStataicBatchConfig.class, TestBatchConfig.class})
-public class ChampItemStaticJobIntegrationTest {
+@SpringBootTest(classes= {ChampStaticBatchConfig.class, TestBatchConfig.class})
+public class ChampStaticJobIntegrationTest {
 	
 	@Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -38,7 +37,7 @@ public class ChampItemStaticJobIntegrationTest {
     private JobRepositoryTestUtils jobRepositoryTestUtils;
     
     @Autowired
-    private ChampItemRepository champItemRepository;
+    private ChampionRepository champRepository;
     
     @Autowired
     private MatchRepository matchRepository;
@@ -47,7 +46,7 @@ public class ChampItemStaticJobIntegrationTest {
     public void afterTest() throws Exception {
     	//테스트 코드에 의해 h2 DB에 생성된 데이터들을 삭제해주는 작업
     	matchRepository.deleteAll();
-    	champItemRepository.deleteAll();
+    	champRepository.deleteAll();
     	jobRepositoryTestUtils.removeJobExecutions();
     }
     
@@ -58,42 +57,39 @@ public class ChampItemStaticJobIntegrationTest {
     	match1.setMatchId("600");
     	match1.setQueueId(420);
     	match1.setGameEndTimestamp(System.currentTimeMillis()-300);
+    	List<Member> members1 = match1.getMembers();
     	for(int i=0;i<10;i++) {
-    		match1.getMembers().add(new Member());
+    		members1.add(new Member());
     	}
     	for(int i=0;i<10;i++) {
-    		match1.getMembers().get(i).setCk(new MemberCompKey(i+"400", match1.getMatchId()));
-    		match1.getMembers().get(i).setMatch(match1);
+    		members1.get(i).setCk(new MemberCompKey(i+"300", match1.getMatchId()));
+    		members1.get(i).setMatch(match1);
     		if(i<5) 
-    			match1.getMembers().get(i).setWins(true);
+    			members1.get(i).setWins(true);
     		else 
-    			match1.getMembers().get(i).setWins(false);
+    			members1.get(i).setWins(false);
     	}
-    	//하나의 매치에 10명의 챔피언 세팅
-    	match1.getMembers().get(0).setChampionid("탈론");  		
-    	match1.getMembers().get(1).setChampionid("그레이브즈");
-    	match1.getMembers().get(2).setChampionid("카타리나");
-    	match1.getMembers().get(3).setChampionid("케이틀린");
-    	match1.getMembers().get(4).setChampionid("나미");
-    	match1.getMembers().get(5).setChampionid("오른");
-    	match1.getMembers().get(6).setChampionid("니달리");
-    	match1.getMembers().get(7).setChampionid("제드");
-    	match1.getMembers().get(8).setChampionid("징크스");
-    	match1.getMembers().get(9).setChampionid("알리스타");
-    	//챔피언 당 아이템 세팅
-    	match1.getMembers().get(0).setItem0(30);
-    	match1.getMembers().get(0).setItem1(31);
-    	match1.getMembers().get(0).setItem2(32);
-    	match1.getMembers().get(1).setItem0(60);
-    	match1.getMembers().get(1).setItem3(30);
-    	match1.getMembers().get(2).setItem3(30);
-    	match1.getMembers().get(3).setItem3(30);
-    	match1.getMembers().get(4).setItem3(30);
-    	match1.getMembers().get(5).setItem3(30);
-    	match1.getMembers().get(6).setItem3(30);
-    	match1.getMembers().get(7).setItem3(30);
-    	match1.getMembers().get(8).setItem3(30);
-    	match1.getMembers().get(9).setItem3(30);
+    	members1.get(0).setChampionid("탈론");  		
+    	members1.get(1).setChampionid("그레이브즈");
+    	members1.get(2).setChampionid("카타리나");
+    	members1.get(3).setChampionid("케이틀린");
+    	members1.get(4).setChampionid("나미");
+    	members1.get(5).setChampionid("오른");
+    	members1.get(6).setChampionid("카직스");
+    	members1.get(7).setChampionid("오리아나");
+    	members1.get(8).setChampionid("징크스");
+    	members1.get(9).setChampionid("알리스타");
+    	
+    	members1.get(0).setPositions("TOP");
+    	members1.get(1).setPositions("JUNGLE");
+    	members1.get(2).setPositions("MIDDLE");
+    	members1.get(3).setPositions("BOTTOM");
+    	members1.get(4).setPositions("UTILITY");
+    	members1.get(5).setPositions("TOP");
+    	members1.get(6).setPositions("JUNGLE");
+    	members1.get(7).setPositions("MIDDLE");
+    	members1.get(8).setPositions("BOTTOM");
+    	members1.get(9).setPositions("UTILITY");
     	
     	Match match2 = new Match();
     	match2.setMatchId("700");
@@ -117,27 +113,21 @@ public class ChampItemStaticJobIntegrationTest {
     	members2.get(3).setChampionid("케이틀린");
     	members2.get(4).setChampionid("나미");
     	members2.get(5).setChampionid("오른");
-    	members2.get(6).setChampionid("카직스");
-    	members2.get(7).setChampionid("오리아나");
+    	members2.get(6).setChampionid("니달리");
+    	members2.get(7).setChampionid("제드");
     	members2.get(8).setChampionid("징크스");
     	members2.get(9).setChampionid("알리스타");
-    	//챔피언 당 아이템 세팅
-    	match1.getMembers().get(0).setItem3(30);
-    	match1.getMembers().get(0).setItem4(31);
-    	match1.getMembers().get(0).setItem5(33);
-    	match1.getMembers().get(1).setItem0(60);
-    	match1.getMembers().get(1).setItem3(30);
-    	match1.getMembers().get(2).setItem0(60);
-    	match1.getMembers().get(2).setItem1(70);
-    	match1.getMembers().get(2).setItem2(66);
-    	match1.getMembers().get(3).setItem0(60);
-    	match1.getMembers().get(3).setItem1(32);
-    	match1.getMembers().get(4).setItem0(50);
-    	match1.getMembers().get(5).setItem0(50);
-    	match1.getMembers().get(6).setItem0(50);
-    	match1.getMembers().get(7).setItem0(50);
-    	match1.getMembers().get(8).setItem0(50);
-    	match1.getMembers().get(9).setItem0(50);
+    	
+    	members2.get(0).setPositions("TOP");
+    	members2.get(1).setPositions("JUNGLE");
+    	members2.get(2).setPositions("MIDDLE");
+    	members2.get(3).setPositions("BOTTOM");
+    	members2.get(4).setPositions("UTILITY");
+    	members2.get(5).setPositions("TOP");
+    	members2.get(6).setPositions("JUNGLE");
+    	members2.get(7).setPositions("MIDDLE");
+    	members2.get(8).setPositions("BOTTOM");
+    	members2.get(9).setPositions("UTILITY");
     	
     	matchRepository.save(match1);
     	matchRepository.save(match2);
@@ -152,14 +142,15 @@ public class ChampItemStaticJobIntegrationTest {
     	
     	//then
     	assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-    	
-    	List<ChampItem> champItems = champItemRepository.findAll();
-    	for(ChampItem champItem : champItems) {
-    		System.out.println(champItem.getCk().getChampionId()+" "+champItem.getCk().getItemId()
-    				+" "+champItem.getWins() +"/"+champItem.getLosses());
+    	List<Champion> champions = champRepository.findAll();
+    	int totalWinCount = 0;
+    	int totalLossCount = 0;
+    	for(Champion champion : champions) {
+    		System.out.println(champion.getCk().getChampionId()+" "+champion.getCk().getPosition()+" "+champion.getWins()+"/"+champion.getLosses());
+    		totalWinCount += champion.getWins();
+    		totalLossCount += champion.getLosses();
     	}
+    	assertThat(totalWinCount-totalLossCount).isEqualTo(0);
     	
-    	//assertThat(yasuo_infinite.getWins()).isEqualTo(1);
-    	//assertThat(yasuo_infinite.getLosses()).isEqualTo(1);
     }
 }

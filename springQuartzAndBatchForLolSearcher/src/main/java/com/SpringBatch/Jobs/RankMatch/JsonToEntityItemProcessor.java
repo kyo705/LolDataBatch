@@ -6,9 +6,9 @@ import java.util.Map;
 
 import org.springframework.batch.item.ItemProcessor;
 
-import com.SpringBatch.Entity.Match;
-import com.SpringBatch.Entity.Member;
-import com.SpringBatch.Entity.MemberCompKey;
+import com.SpringBatch.Entity.match.Match;
+import com.SpringBatch.Entity.match.Member;
+import com.SpringBatch.Entity.match.MemberCompKey;
 
 @SuppressWarnings({"rawtypes","unchecked"})
 public class JsonToEntityItemProcessor implements ItemProcessor<Map, Match> {

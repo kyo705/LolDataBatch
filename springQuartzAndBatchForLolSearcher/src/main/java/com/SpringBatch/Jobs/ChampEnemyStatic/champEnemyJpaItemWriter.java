@@ -9,10 +9,10 @@ import javax.persistence.EntityManager;
 
 import org.springframework.batch.item.database.JpaItemWriter;
 
-import com.SpringBatch.Entity.Match;
-import com.SpringBatch.Entity.Member;
 import com.SpringBatch.Entity.Champion.ChampionEnemy.ChampEnemy;
 import com.SpringBatch.Entity.Champion.ChampionEnemy.ChampEnemyCompKey;
+import com.SpringBatch.Entity.match.Match;
+import com.SpringBatch.Entity.match.Member;
 
 public class champEnemyJpaItemWriter extends JpaItemWriter<Match> {
 	

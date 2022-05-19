@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.SpringBatch.Entity.Match;
+import com.SpringBatch.Entity.match.Match;
 
 @Configuration
 public class ChampItemStataicBatchConfig {

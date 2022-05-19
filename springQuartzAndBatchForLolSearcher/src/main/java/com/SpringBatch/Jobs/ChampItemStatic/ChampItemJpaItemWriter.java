@@ -9,10 +9,10 @@ import javax.persistence.EntityManager;
 
 import org.springframework.batch.item.database.JpaItemWriter;
 
-import com.SpringBatch.Entity.Match;
-import com.SpringBatch.Entity.Member;
 import com.SpringBatch.Entity.Champion.ChampionItem.ChampItem;
 import com.SpringBatch.Entity.Champion.ChampionItem.ChampItemCompKey;
+import com.SpringBatch.Entity.match.Match;
+import com.SpringBatch.Entity.match.Member;
 
 public class ChampItemJpaItemWriter extends JpaItemWriter<Match> {
 
@@ -79,24 +79,33 @@ public class ChampItemJpaItemWriter extends JpaItemWriter<Match> {
 			Iterator<Map.Entry<String, Map<Integer,Long>[]>> iter = champion.entrySet().iterator();
 			while(iter.hasNext()) {
 				Map.Entry<String, Map<Integer,Long>[]> entry = iter.next();
-				
-				Iterator<Map.Entry<Integer,Long>> iter2 = entry.getValue()[0].entrySet().iterator();
-				while(iter2.hasNext()) {
-					Map.Entry<Integer,Long> itemCountEntry = iter2.next();
+				for(int i=0;i<2;i++) {
+					if(entry.getValue()[i].size() == 0) continue;
 					
-					ChampItemCompKey champItemCk = new ChampItemCompKey(entry.getKey(),season,itemCountEntry.getKey());
-					ChampItem champItem = entityManager.find(ChampItem.class, champItemCk);
-					
-					if(champItem!=null) {
-						champItem.setWins(champItem.getWins()+entry.getValue()[0].get(itemCountEntry.getKey()));
-						champItem.setLosses(champItem.getLosses()+entry.getValue()[1].get(itemCountEntry.getKey()));
-					}else {
-						champItem = new ChampItem();
-						champItem.setCk(champItemCk);
-						champItem.setWins(entry.getValue()[0].get(itemCountEntry.getKey()));
-						champItem.setLosses(entry.getValue()[1].get(itemCountEntry.getKey()));
+					Iterator<Map.Entry<Integer,Long>> iter2 = entry.getValue()[i].entrySet().iterator();
+					while(iter2.hasNext()) {
+						Map.Entry<Integer,Long> itemCountEntry = iter2.next();
 						
-						entityManager.persist(champItem);
+						if(itemCountEntry.getKey()==0) continue;
+						
+						ChampItemCompKey champItemCk = new ChampItemCompKey(entry.getKey(),season,itemCountEntry.getKey());
+						ChampItem champItem = entityManager.find(ChampItem.class, champItemCk);
+						
+						if(champItem!=null) {
+							if(i==0)
+								champItem.setWins(champItem.getWins()+entry.getValue()[i].get(itemCountEntry.getKey()));
+							else
+								champItem.setLosses(champItem.getLosses()+entry.getValue()[i].get(itemCountEntry.getKey()));
+						}else {
+							champItem = new ChampItem();
+							champItem.setCk(champItemCk);
+							if(i==0)
+								champItem.setWins(entry.getValue()[i].get(itemCountEntry.getKey()));
+							else
+								champItem.setLosses(entry.getValue()[i].get(itemCountEntry.getKey()));
+							
+							entityManager.persist(champItem);
+						}
 					}
 				}
 			}

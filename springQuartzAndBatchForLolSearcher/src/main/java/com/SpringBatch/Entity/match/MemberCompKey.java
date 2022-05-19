@@ -1,4 +1,4 @@
-package com.SpringBatch.Entity;
+package com.SpringBatch.Entity.match;
 
 import java.io.Serializable;
 import java.util.Objects;

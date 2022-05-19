@@ -49,8 +49,8 @@ private static final int chunksize = 2000;
 	@Bean
 	public JpaPagingItemReader<Summoner> jpaPagingItemReader() {
 		String queryString = "SELECT s FROM Summoner s "
-				+ "WHERE s.id IN (SELECT r.summonerId FROM Rank r"
-				+ "WHERE r.queueType = 'RANKED_SOLO_5x5' AND "
+				+ "WHERE s.id IN (SELECT r.ck.summonerId FROM Rank r "
+				+ "WHERE r.ck.queueType = 'RANKED_SOLO_5x5' AND "
 				+ "r.tier IN ('PLATINUM','DIAMOND','MASTER','GRANDMASTER','CHALLENGER'))";
 		
 		

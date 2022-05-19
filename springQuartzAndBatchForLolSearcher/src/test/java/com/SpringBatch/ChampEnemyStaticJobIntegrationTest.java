@@ -18,10 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.SpringBatch.Entity.Match;
-import com.SpringBatch.Entity.Member;
-import com.SpringBatch.Entity.MemberCompKey;
 import com.SpringBatch.Entity.Champion.ChampionEnemy.ChampEnemy;
+import com.SpringBatch.Entity.match.Match;
+import com.SpringBatch.Entity.match.Member;
+import com.SpringBatch.Entity.match.MemberCompKey;
 import com.SpringBatch.Jobs.ChampEnemyStatic.ChampEnemyStaticBatchConfig;
 import com.SpringBatch.repository.ChampEnemyRepository;
 import com.SpringBatch.repository.MatchRepository;

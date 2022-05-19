@@ -88,7 +88,7 @@ public class ChampStaticBatchConfig {
 			
 			Object[] item = (Object[])items;
 			
-			champion.setCk(new ChampionCompKey((String)item[0], (String)item[1], (String)item[2]));
+			champion.setCk(new ChampionCompKey((String)item[0], (int)item[1], (String)item[2]));
 			
 			if((boolean)item[3]==true) {
 				champion.setWins((long)item[4]);

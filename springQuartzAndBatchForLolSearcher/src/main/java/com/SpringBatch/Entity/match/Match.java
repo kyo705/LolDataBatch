@@ -1,4 +1,4 @@
-package com.SpringBatch.Entity;
+package com.SpringBatch.Entity.match;
 
 import java.util.ArrayList;
 import java.util.List;
