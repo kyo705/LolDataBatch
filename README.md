@@ -25,4 +25,8 @@
  프로젝트 구조
 -----------------
 
-![image](https://user-images.githubusercontent.com/89891704/175952730-13be70c6-0233-4e61-85c5-1686326e0069.png)
+![image](https://user-images.githubusercontent.com/89891704/175961577-7c159dae-4367-43be-8380-d8de1c671df0.png)   
+
+![image](https://user-images.githubusercontent.com/89891704/175963624-a4a28556-2641-478f-94f5-8afb6aa50c2e.png)
+
+
