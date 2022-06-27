@@ -88,9 +88,9 @@ public class RankMatchBatchConfig {
 	public JpaItemWriter<Match> jpaItemWriter(){
 		JpaItemWriterBuilder<Match> jpaItemWriterBuilder = new JpaItemWriterBuilder<>();
 		
-		return jpaItemWriterBuilder.
-				entityManagerFactory(entityManagerFactory).
-				build();
+		return jpaItemWriterBuilder
+				.entityManagerFactory(entityManagerFactory)
+				.build();
 	}
 
 }

@@ -23,22 +23,25 @@ import com.SpringBatch.Entity.match.Match;
 import com.SpringBatch.Entity.match.Member;
 import com.SpringBatch.Entity.match.MemberCompKey;
 import com.SpringBatch.Jobs.ChampEnemyStatic.ChampEnemyStaticBatchConfig;
-import com.SpringBatch.repository.ChampEnemyRepository;
 import com.SpringBatch.repository.MatchRepository;
+import com.SpringBatch.repository.championrepository.ChampionReository;
+import com.SpringBatch.repository.championrepository.JpaChampionRepository;
 
 @ActiveProfiles("test")
 @SpringBatchTest
-@SpringBootTest(classes= {ChampEnemyStaticBatchConfig.class, TestBatchConfig.class})
+@SpringBootTest(classes= {ChampEnemyStaticBatchConfig.class, TestBatchConfig.class, JpaChampionRepository.class})
 public class ChampEnemyStaticJobIntegrationTest {
 
+	private static final int seasonId = 22;
+	
 	@Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
     private JobRepositoryTestUtils jobRepositoryTestUtils;
-    
+
     @Autowired
-    private ChampEnemyRepository champEnemyRepository;
+    private ChampionReository jpaChampionReository;
     
     @Autowired
     private MatchRepository matchRepository;
@@ -47,7 +50,7 @@ public class ChampEnemyStaticJobIntegrationTest {
     public void afterTest() throws Exception {
     	//테스트 코드에 의해 h2 DB에 생성된 데이터들을 삭제해주는 작업
     	matchRepository.deleteAll();
-    	champEnemyRepository.deleteAll();
+    	jpaChampionReository.deleteChampEnemysAll();
     	jobRepositoryTestUtils.removeJobExecutions();
     }
     
@@ -56,6 +59,7 @@ public class ChampEnemyStaticJobIntegrationTest {
     	
     	//given
     	Match match1 = new Match();
+    	match1.setSeason(seasonId);
     	match1.setMatchId("600");
     	match1.setQueueId(420);
     	match1.setGameEndTimestamp(System.currentTimeMillis()-300);
@@ -93,6 +97,7 @@ public class ChampEnemyStaticJobIntegrationTest {
     	match1.getMembers().get(9).setPositions("UTILITY");
     	
     	Match match2 = new Match();
+    	match2.setSeason(seasonId);
     	match2.setMatchId("700");
     	match2.setQueueId(420);
     	match2.setGameEndTimestamp(System.currentTimeMillis()-200);
@@ -129,9 +134,6 @@ public class ChampEnemyStaticJobIntegrationTest {
     	members2.get(7).setPositions("MIDDLE");
     	members2.get(8).setPositions("BOTTOM");
     	members2.get(9).setPositions("UTILITY");
-    	for(int i=0;i<10;i++) {
-    		System.out.println(match1.getMembers().get(i).getChampionid()+" "+match1.getMatchId()+" "+match1.getMembers().get(i).getCk().getSummonerid());
-    	}
     	
     	matchRepository.save(match1);
     	matchRepository.save(match2);
@@ -149,10 +151,11 @@ public class ChampEnemyStaticJobIntegrationTest {
     	//then
     	assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
     	
-    	List<ChampEnemy> champEnemys = champEnemyRepository.findAll();
-    	for(ChampEnemy champEnemy : champEnemys) {
-    		System.out.println(champEnemy.getCk().getChampionId() + " " + champEnemy.getCk().getEnemychampionId() + " "
-    	+ champEnemy.getWins()+"/"+champEnemy.getLosses());
-    	}
+    	List<ChampEnemy> champEnemys1 = jpaChampionReository.findChampEnemys("탈론"); //오른과 전적 2판 다 이김
+    	assertThat(champEnemys1.size()).isEqualTo(1);
+    	assertThat(champEnemys1.get(0).getCk().getChampionId()).isEqualTo("탈론");
+    	assertThat(champEnemys1.get(0).getCk().getEnemychampionId()).isEqualTo("오른");
+    	assertThat(champEnemys1.get(0).getWins()).isEqualTo(2);
+    	assertThat(champEnemys1.get(0).getLosses()).isEqualTo(0);
     }
 }

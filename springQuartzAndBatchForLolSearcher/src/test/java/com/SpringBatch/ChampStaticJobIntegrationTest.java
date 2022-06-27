@@ -22,13 +22,16 @@ import com.SpringBatch.Entity.match.Match;
 import com.SpringBatch.Entity.match.Member;
 import com.SpringBatch.Entity.match.MemberCompKey;
 import com.SpringBatch.Jobs.ChampStatic.ChampStaticBatchConfig;
-import com.SpringBatch.repository.ChampionRepository;
 import com.SpringBatch.repository.MatchRepository;
+import com.SpringBatch.repository.championrepository.ChampionReository;
+import com.SpringBatch.repository.championrepository.JpaChampionRepository;
 
 @ActiveProfiles("test")
 @SpringBatchTest
-@SpringBootTest(classes= {ChampStaticBatchConfig.class, TestBatchConfig.class})
+@SpringBootTest(classes= {ChampStaticBatchConfig.class, TestBatchConfig.class, JpaChampionRepository.class})
 public class ChampStaticJobIntegrationTest {
+	
+	private static final int seasonId = 22;
 	
 	@Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -37,7 +40,7 @@ public class ChampStaticJobIntegrationTest {
     private JobRepositoryTestUtils jobRepositoryTestUtils;
     
     @Autowired
-    private ChampionRepository champRepository;
+    private ChampionReository jpaChampionReository;
     
     @Autowired
     private MatchRepository matchRepository;
@@ -46,7 +49,7 @@ public class ChampStaticJobIntegrationTest {
     public void afterTest() throws Exception {
     	//테스트 코드에 의해 h2 DB에 생성된 데이터들을 삭제해주는 작업
     	matchRepository.deleteAll();
-    	champRepository.deleteAll();
+    	jpaChampionReository.deleteChampsAll();
     	jobRepositoryTestUtils.removeJobExecutions();
     }
     
@@ -54,6 +57,7 @@ public class ChampStaticJobIntegrationTest {
     public void testChampItemStaticJob() throws Exception {
     	//given
     	Match match1 = new Match();
+    	match1.setSeason(seasonId);
     	match1.setMatchId("600");
     	match1.setQueueId(420);
     	match1.setGameEndTimestamp(System.currentTimeMillis()-300);
@@ -92,6 +96,7 @@ public class ChampStaticJobIntegrationTest {
     	members1.get(9).setPositions("UTILITY");
     	
     	Match match2 = new Match();
+    	match2.setSeason(seasonId);
     	match2.setMatchId("700");
     	match2.setQueueId(420);
     	match2.setGameEndTimestamp(System.currentTimeMillis()-200);
@@ -142,11 +147,11 @@ public class ChampStaticJobIntegrationTest {
     	
     	//then
     	assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-    	List<Champion> champions = champRepository.findAll();
+    	List<Champion> champions = jpaChampionReository.findChamps("MIDDLE");
+    	assertThat(champions.size()).isEqualTo(3); //카타리나, 오리아나, 제드 총 3명
     	int totalWinCount = 0;
     	int totalLossCount = 0;
     	for(Champion champion : champions) {
-    		System.out.println(champion.getCk().getChampionId()+" "+champion.getCk().getPosition()+" "+champion.getWins()+"/"+champion.getLosses());
     		totalWinCount += champion.getWins();
     		totalLossCount += champion.getLosses();
     	}

@@ -21,7 +21,8 @@ public class champEnemyJpaItemWriter extends JpaItemWriter<Match> {
 	protected void doWrite(EntityManager entityManager, List<? extends Match> items) {
 		
 		Map<String, Map<String,Long>[]> championEnmey = new HashMap<>();
-		int season = 0;
+		//½ÃÁð ¹Ù²ð¶§¸¶´Ù ¹Ù²ãÁà¾ßÇÏ´Â °ª
+		int season = 22;
 		
 		if (!items.isEmpty()) {
 			boolean plag = true;
@@ -83,7 +84,6 @@ public class champEnemyJpaItemWriter extends JpaItemWriter<Match> {
 				Map.Entry<String, Map<String,Long>[]> entry = iter.next();
 				
 				for(int i=0;i<2;i++) {
-					System.out.println(entry.getKey());
 					if(entry.getValue()[i].size()==0) {
 						continue;
 					}

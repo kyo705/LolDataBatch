@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -24,7 +25,7 @@ public class Match {
 	
 	//Member Entity의 특정 필드명, 패치전략 default값이 lazy이기 때문에 따로 설정 안함.
 	//Match하나에 10개의 Member가 들어가기 때문에 ArrayList size를 default값(size : 10)으로 사용
-	@OneToMany(mappedBy = "match", cascade = CascadeType.ALL) 
+	@OneToMany(mappedBy = "match", cascade = CascadeType.ALL, fetch = FetchType.EAGER) 
 	private List<Member> members = new ArrayList<>();
 	
 	

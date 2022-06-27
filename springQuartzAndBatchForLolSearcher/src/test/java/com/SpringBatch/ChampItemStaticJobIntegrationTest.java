@@ -23,13 +23,16 @@ import com.SpringBatch.Entity.match.Match;
 import com.SpringBatch.Entity.match.Member;
 import com.SpringBatch.Entity.match.MemberCompKey;
 import com.SpringBatch.Jobs.ChampItemStatic.ChampItemStataicBatchConfig;
-import com.SpringBatch.repository.ChampItemRepository;
 import com.SpringBatch.repository.MatchRepository;
+import com.SpringBatch.repository.championrepository.ChampionReository;
+import com.SpringBatch.repository.championrepository.JpaChampionRepository;
 
 @ActiveProfiles("test")
 @SpringBatchTest
-@SpringBootTest(classes= {ChampItemStataicBatchConfig.class, TestBatchConfig.class})
+@SpringBootTest(classes= {ChampItemStataicBatchConfig.class, TestBatchConfig.class, JpaChampionRepository.class})
 public class ChampItemStaticJobIntegrationTest {
+	
+	private static final int seasonId = 22;
 	
 	@Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -38,7 +41,7 @@ public class ChampItemStaticJobIntegrationTest {
     private JobRepositoryTestUtils jobRepositoryTestUtils;
     
     @Autowired
-    private ChampItemRepository champItemRepository;
+    private ChampionReository jpaChampionReository;
     
     @Autowired
     private MatchRepository matchRepository;
@@ -47,7 +50,7 @@ public class ChampItemStaticJobIntegrationTest {
     public void afterTest() throws Exception {
     	//테스트 코드에 의해 h2 DB에 생성된 데이터들을 삭제해주는 작업
     	matchRepository.deleteAll();
-    	champItemRepository.deleteAll();
+    	jpaChampionReository.deleteChampItemsAll();
     	jobRepositoryTestUtils.removeJobExecutions();
     }
     
@@ -55,6 +58,7 @@ public class ChampItemStaticJobIntegrationTest {
     public void testChampItemStaticJob() throws Exception {
     	//given
     	Match match1 = new Match();
+    	match1.setSeason(seasonId);
     	match1.setMatchId("600");
     	match1.setQueueId(420);
     	match1.setGameEndTimestamp(System.currentTimeMillis()-300);
@@ -96,6 +100,7 @@ public class ChampItemStaticJobIntegrationTest {
     	match1.getMembers().get(9).setItem3(30);
     	
     	Match match2 = new Match();
+    	match2.setSeason(seasonId);
     	match2.setMatchId("700");
     	match2.setQueueId(420);
     	match2.setGameEndTimestamp(System.currentTimeMillis()-200);
@@ -153,13 +158,12 @@ public class ChampItemStaticJobIntegrationTest {
     	//then
     	assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
     	
-    	List<ChampItem> champItems = champItemRepository.findAll();
+    	List<ChampItem> champItems = jpaChampionReository.findChampItems("그레이브즈");
+    	assertThat(champItems.size()).isEqualTo(2);
     	for(ChampItem champItem : champItems) {
     		System.out.println(champItem.getCk().getChampionId()+" "+champItem.getCk().getItemId()
     				+" "+champItem.getWins() +"/"+champItem.getLosses());
     	}
     	
-    	//assertThat(yasuo_infinite.getWins()).isEqualTo(1);
-    	//assertThat(yasuo_infinite.getLosses()).isEqualTo(1);
     }
 }

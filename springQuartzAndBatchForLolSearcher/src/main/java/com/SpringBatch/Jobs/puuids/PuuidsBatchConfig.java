@@ -15,7 +15,7 @@ import com.SpringBatch.Entity.Summoner;
 
 @Configuration
 public class PuuidsBatchConfig {
-private static final int chunksize = 2000;
+private static final int chunksize = 100;
 	
 	private final JobBuilderFactory jobBuilderFactory;
 	

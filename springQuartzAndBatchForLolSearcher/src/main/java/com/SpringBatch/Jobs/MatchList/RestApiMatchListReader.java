@@ -11,6 +11,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 public class RestApiMatchListReader implements ItemReader<List<String>> {
 
+	private static final String key = "RGAPI-2a0ac3ef-7f65-4854-97d4-54e2c7b3dbab";
+	
 	private WebClient webClient;
 	
 	private String puuId;
@@ -27,7 +29,7 @@ public class RestApiMatchListReader implements ItemReader<List<String>> {
 		
 		String[] matchIds = null;
 		String uri = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/"
-				+ puuId + "/ids?queue=420&start=0&count=100";
+				+ puuId + "/ids?queue=420&start=0&count=100&api_key="+key;
 		
 		if(used==false) {
 			matchIds = webClient.get()
@@ -36,9 +38,13 @@ public class RestApiMatchListReader implements ItemReader<List<String>> {
 					.bodyToMono(String[].class)
 					.block();
 			used = true;
+			
+			return Arrays.asList(matchIds);
+		}else {
+			return null;
 		}
 		
-		return Arrays.asList(matchIds);
+		
 	}
 
 }
