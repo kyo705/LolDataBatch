@@ -50,15 +50,15 @@ public class RankMatchBatchConfig {
 	}
 	
 	@Bean
-	public Job jobBuilderFactory() {
+	public Job matchJob() {
 		return jobBuilderFactory.get("matchesJob")
-				.start(stepBuilderFactory())
+				.start(matchStep())
 				.build();
 	}
 	
 	@Bean
 	@JobScope
-	public Step stepBuilderFactory() {
+	public Step matchStep() {
 		return stepBuilderFactory.get("matchesStep")
 				.<Map,Match>chunk(chunksize)
 				.reader(restApiMatchesReader(webClient(), null))

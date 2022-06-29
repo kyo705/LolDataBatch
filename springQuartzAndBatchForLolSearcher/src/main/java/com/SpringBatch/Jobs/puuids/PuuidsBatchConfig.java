@@ -31,14 +31,14 @@ private static final int chunksize = 100;
 	}
 	
 	@Bean
-	public Job jobBuilderFactory() {
+	public Job puuidsJob() {
 		return jobBuilderFactory.get("puuIdsJob")
-				.start(stepBuilderFactory())
+				.start(puuidsStep())
 				.build();
 	}
 	
 	@Bean
-	public Step stepBuilderFactory() {
+	public Step puuidsStep() {
 		return stepBuilderFactory.get("puuIdsStep")
 				.<Summoner,Summoner>chunk(chunksize)
 				.reader(jpaPagingItemReader())

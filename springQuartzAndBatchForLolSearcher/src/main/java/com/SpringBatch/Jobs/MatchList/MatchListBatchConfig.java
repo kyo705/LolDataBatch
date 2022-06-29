@@ -42,15 +42,15 @@ public class MatchListBatchConfig {
 	}
 	
 	@Bean
-	public Job jobBuilderFactory() {
+	public Job matchListJob() {
 		return jobBuilderFactory.get("matchListJob")
-				.start(stepBuilderFactory())
+				.start(matchListStep())
 				.build();
 	}
 	
 	@Bean
 	@JobScope
-	public Step stepBuilderFactory() {
+	public Step matchListStep() {
 		return stepBuilderFactory.get("matchListStep")
 				.<List<String>,String>chunk(chunksize)
 				.reader(restApiMatchesReader(webClient(), null))
