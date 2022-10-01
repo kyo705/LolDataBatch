@@ -70,7 +70,8 @@ public class ChampStaticBatchConfig {
 		String queryString = "SELECT DISTINCT k.championid, m.season, k.positions, k.wins, count(m) "
 				+ "FROM Match m INNER JOIN m.members k "
 				+ "WHERE (m.gameEndTimestamp BETWEEN :startDatetime AND :endDatetime) AND m.queueId = :queueId "
-				+ "GROUP BY m.season, k.championid, k.wins";
+				+ "GROUP BY m.season, k.championid, k.wins"
+				+ "ORDER BY ";
 		
 		return new JpaPagingItemReaderBuilder<Object>()
 				.name("dbMatchReader")

@@ -1,7 +1,6 @@
 package com.SpringBatch.Jobs.ChampEnemyStatic;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,100 +21,72 @@ public class champEnemyJpaItemWriter extends JpaItemWriter<Match> {
 		
 		Map<String, Map<String,Long>[]> championEnmey = new HashMap<>();
 		//시즌 바뀔때마다 바꿔줘야하는 값
-		int season = 22;
+		int seasonId = 22;
 		
 		if (!items.isEmpty()) {
-			boolean plag = true;
-			
 			for (Match item : items) {
-				if(plag) {
-					season = item.getSeason();
-					plag = false;
-				}
-				
-				List<Member> members = item.getMembers();		
-				Iterator<Member> memberIter = members.iterator();
-				while(memberIter.hasNext()) {
-					Member member = memberIter.next();
+				for(Member member : item.getMembers()) {
 					String champId = member.getChampionid();
 					String position = member.getPositions();
-					
-					Iterator<Member> enemyMemberIter = members.iterator();
-					while(enemyMemberIter.hasNext()) {
-						Member enemy = enemyMemberIter.next();
-						String enemyChampId = enemy.getChampionid();
-						String enemyPosition = enemy.getPositions();
-						if(!champId.equals(enemyChampId) 
-								&& position.equals(enemyPosition)) {
-							
+					for(Member enemy_member : item.getMembers()) {
+						String enemyChampId = enemy_member.getChampionid();
+						String enemyPosition = enemy_member.getPositions();
+						
+						if(!champId.equals(enemyChampId) && position.equals(enemyPosition)) {
 							if(member.getWins()) {
 								Map<String,Long> champWinEnemy = null;
 								
-								if(championEnmey.containsKey(champId)) {
-									champWinEnemy = championEnmey.get(champId)[0];
-								}else {
+								if(!championEnmey.containsKey(champId))  {
 									championEnmey.put(champId, new Map[] {new HashMap<String,Long>(),new HashMap<String,Long>()});
-									champWinEnemy = championEnmey.get(champId)[0];
 								}
-								 
+								champWinEnemy = championEnmey.get(champId)[0];
 								champWinEnemy.put(enemyChampId, champWinEnemy.getOrDefault(enemyChampId, 0L)+1);
 							}else {
 								Map<String,Long> champLossEnemy = null;
 								
-								if(championEnmey.containsKey(champId)) {
-									champLossEnemy = championEnmey.get(champId)[1];
-								}else {
+								if(!championEnmey.containsKey(champId)) {
 									championEnmey.put(champId, new Map[] {new HashMap<String,Long>(),new HashMap<String,Long>()});
-									champLossEnemy = championEnmey.get(champId)[1];
 								}
-								
+								champLossEnemy = championEnmey.get(champId)[1];
 								champLossEnemy.put(enemyChampId, champLossEnemy.getOrDefault(enemyChampId, 0L)+1);
 							}
-							
-							break;
 						}
 					}
 				}
 			}
 			
 			//db에서 enemy 테이블 조회하고 값 변경
-			Iterator<Map.Entry<String, Map<String,Long>[]>> iter = championEnmey.entrySet().iterator();
-			while(iter.hasNext()) {
-				Map.Entry<String, Map<String,Long>[]> entry = iter.next();
+			for(Map.Entry<String, Map<String, Long>[]> entry1 : championEnmey.entrySet()) {
+				String champId = entry1.getKey();
+				Map<String,Long>[] champ_enemy_info = entry1.getValue();
 				
 				for(int i=0;i<2;i++) {
-					if(entry.getValue()[i].size()==0) {
+					if(champ_enemy_info[i].size()==0) {
 						continue;
 					}
-					Iterator<Map.Entry<String,Long>> enemyCountIter = entry.getValue()[i].entrySet().iterator();
-					while(enemyCountIter.hasNext()) {
-						Map.Entry<String,Long> EnemyCountEntry = enemyCountIter.next();
-						ChampEnemyCompKey champEnemyCk = new ChampEnemyCompKey(entry.getKey(), season, EnemyCountEntry.getKey());
+					
+					for(Map.Entry<String, Long> entry2 : champ_enemy_info[i].entrySet()) {
+						String enemy_champId = entry2.getKey();
+						long count = entry2.getValue();
+						
+						ChampEnemyCompKey champEnemyCk = new ChampEnemyCompKey(champId, seasonId, enemy_champId);
 						ChampEnemy champEnemy = entityManager.find(ChampEnemy.class, champEnemyCk);
 						
-						if(champEnemy!=null) {
-							if(i==0)
-								champEnemy.setWins(champEnemy.getWins()+EnemyCountEntry.getValue());
-							else 
-								champEnemy.setLosses(champEnemy.getLosses()+EnemyCountEntry.getValue());
-							
-						}else {
+						if(champEnemy==null) {
 							champEnemy = new ChampEnemy();
 							champEnemy.setCk(champEnemyCk);
-							if(i==0) {
-								champEnemy.setWins(EnemyCountEntry.getValue());
-								champEnemy.setLosses(0L);
-							}else {
-								champEnemy.setWins(0L);
-								champEnemy.setLosses(EnemyCountEntry.getValue());
-							}
-							
+							champEnemy.setWins(0l);
+							champEnemy.setLosses(0l);
 							entityManager.persist(champEnemy);
 						}
+						
+						if(i==0)
+							champEnemy.setWins(champEnemy.getWins()+count);
+						else
+							champEnemy.setLosses(champEnemy.getLosses()+count);
+						
 					}
-					
 				}
-				
 			}
 		}
 	}

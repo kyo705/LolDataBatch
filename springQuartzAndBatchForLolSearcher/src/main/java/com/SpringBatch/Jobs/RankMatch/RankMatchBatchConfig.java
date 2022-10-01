@@ -60,7 +60,7 @@ public class RankMatchBatchConfig {
 	@JobScope
 	public Step matchStep() {
 		return stepBuilderFactory.get("matchesStep")
-				.<Map,Match>chunk(chunksize)
+				.<Map,Match>chunk(new RestApiCompletionPolicy())
 				.reader(restApiMatchesReader(webClient(), null))
 				.processor(processer())
 				.writer(jpaItemWriter())

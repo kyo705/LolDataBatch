@@ -1,5 +1,6 @@
 package com.SpringBatch.Jobs.ChampEnemyStatic;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,8 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.CompositeJobParametersValidator;
+import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.SpringBatch.Entity.match.Match;
+import com.SpringBatch.paramvalidator.ChampStaticJobParamValidator;
 
 @Configuration
 public class ChampEnemyStaticBatchConfig {
@@ -27,8 +31,9 @@ public class ChampEnemyStaticBatchConfig {
 	
 	private static final int chunckSize = 200;
 
-	public ChampEnemyStaticBatchConfig(EntityManagerFactory emf, JobBuilderFactory jbf, StepBuilderFactory sbf) {
-		super();
+	public ChampEnemyStaticBatchConfig(EntityManagerFactory emf, 
+			JobBuilderFactory jbf, 
+			StepBuilderFactory sbf) {
 		this.emf = emf;
 		this.jbf = jbf;
 		this.sbf = sbf;
@@ -37,6 +42,7 @@ public class ChampEnemyStaticBatchConfig {
 	@Bean
 	public Job champEnemyStaticJob() {
 		return jbf.get("champEnemyStaticJob")
+				.validator(champStaticParamValidator()) 
 				.start(champEnemyStaticStep())
 				.build();
 	}
@@ -67,9 +73,10 @@ public class ChampEnemyStaticBatchConfig {
 				.name("dbChampItemReader")
 				.entityManagerFactory(emf)
 				.pageSize(chunckSize)
-				.queryString("SELECT DISTINCT m FROM Match m join fetch m.members "
+				.queryString("SELECT m FROM Match m "
 						+ "WHERE (m.gameEndTimestamp BETWEEN :startDatetime AND :endDatetime) "
-						+ "AND m.queueId = :queueId")
+						+ "AND m.queueId = :queueId "
+						+ "ORDER BY m.matchid")
 				.parameterValues(parameters)
 				.build();
 	}
@@ -80,4 +87,25 @@ public class ChampEnemyStaticBatchConfig {
 		itemWriter.setEntityManagerFactory(emf);
 		return itemWriter;
 	}
+	
+	@Bean
+	public CompositeJobParametersValidator champStaticParamValidator() {
+		CompositeJobParametersValidator compositeValidator = new CompositeJobParametersValidator();
+		
+		DefaultJobParametersValidator defaultValidator = 
+				new DefaultJobParametersValidator(
+						new String[] {"currentTimeStamp","queueId","seasonId"}, 
+						new String[] {});
+		
+		defaultValidator.afterPropertiesSet();
+		
+		
+		ChampStaticJobParamValidator champStaticValidator = new ChampStaticJobParamValidator();
+		
+		compositeValidator.setValidators(
+				Arrays.asList(defaultValidator, champStaticValidator));
+		
+		return compositeValidator;
+	}
+	
 }

@@ -11,69 +11,64 @@ import org.springframework.batch.item.database.JpaItemWriter;
 
 import com.SpringBatch.Entity.Champion.ChampionItem.ChampItem;
 import com.SpringBatch.Entity.Champion.ChampionItem.ChampItemCompKey;
-import com.SpringBatch.Entity.match.Match;
 import com.SpringBatch.Entity.match.Member;
 
-public class ChampItemJpaItemWriter extends JpaItemWriter<Match> {
+public class ChampItemJpaItemWriter extends JpaItemWriter<Member> {
+
+	private final int seasonId;
+	
+	public ChampItemJpaItemWriter(int seasonId) {
+		this.seasonId = seasonId;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected void doWrite(EntityManager entityManager, List<? extends Match> items) {
+	protected void doWrite(EntityManager entityManager, List<? extends Member> items) {
 		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Writing to JPA with " + items.size() + " items.");
 		}
 		
 		Map<String, Map<Integer,Long>[]> champion = new HashMap<>();
-		int season = 0;
+		int season = seasonId;
 		
 		if (!items.isEmpty()) {
 			long addedToContextCount = 0;
-			boolean plag = true;
 			
-			for (Match item : items) {
-				List<Member> members = item.getMembers();
+			for (Member item : items) {
 				
-				Iterator<Member> iter = members.iterator();
+				Member member = item;
 				
-				if(plag) {
-					season = item.getSeason();
-					plag = false;
+				String champId = member.getChampionid();
+				int item0 = member.getItem0();
+				int item1 = member.getItem1();
+				int item2 = member.getItem2();
+				int item3 = member.getItem3();
+				int item4 = member.getItem4();
+				int item5 = member.getItem5();
+				
+				if(champion.get(champId)==null) {
+					champion.put(champId, new Map[] {new HashMap<Integer,Long>(), new HashMap<Integer,Long>()});
 				}
 				
-				while(iter.hasNext()) {
-					Member member = iter.next();
-					
-					String champId = member.getChampionid();
-					int item0 = member.getItem0();
-					int item1 = member.getItem1();
-					int item2 = member.getItem2();
-					int item3 = member.getItem3();
-					int item4 = member.getItem4();
-					int item5 = member.getItem5();
-					
-					if(champion.get(champId)==null) {
-						champion.put(champId, new Map[] {new HashMap<Integer,Long>(), new HashMap<Integer,Long>()});
-					}
-					
-					if(member.getWins()) {
-						Map<Integer,Long> champWinItems = champion.get(champId)[0];
-						champWinItems.put(item0, champWinItems.getOrDefault(item0, 0L)+1);
-						champWinItems.put(item1, champWinItems.getOrDefault(item1, 0L)+1);
-						champWinItems.put(item2, champWinItems.getOrDefault(item2, 0L)+1);
-						champWinItems.put(item3, champWinItems.getOrDefault(item3, 0L)+1);
-						champWinItems.put(item4, champWinItems.getOrDefault(item4, 0L)+1);
-						champWinItems.put(item5, champWinItems.getOrDefault(item5, 0L)+1);
-					}else {
-						Map<Integer,Long> champLossItems = champion.get(champId)[1];
-						champLossItems.put(item0, champLossItems.getOrDefault(item0, 0L)+1);
-						champLossItems.put(item1, champLossItems.getOrDefault(item1, 0L)+1);
-						champLossItems.put(item2, champLossItems.getOrDefault(item2, 0L)+1);
-						champLossItems.put(item3, champLossItems.getOrDefault(item3, 0L)+1);
-						champLossItems.put(item4, champLossItems.getOrDefault(item4, 0L)+1);
-						champLossItems.put(item5, champLossItems.getOrDefault(item5, 0L)+1);
-					}
+				if(member.getWins()) {
+					Map<Integer,Long> champWinItems = champion.get(champId)[0];
+					champWinItems.put(item0, champWinItems.getOrDefault(item0, 0L)+1);
+					champWinItems.put(item1, champWinItems.getOrDefault(item1, 0L)+1);
+					champWinItems.put(item2, champWinItems.getOrDefault(item2, 0L)+1);
+					champWinItems.put(item3, champWinItems.getOrDefault(item3, 0L)+1);
+					champWinItems.put(item4, champWinItems.getOrDefault(item4, 0L)+1);
+					champWinItems.put(item5, champWinItems.getOrDefault(item5, 0L)+1);
+				}else {
+					Map<Integer,Long> champLossItems = champion.get(champId)[1];
+					champLossItems.put(item0, champLossItems.getOrDefault(item0, 0L)+1);
+					champLossItems.put(item1, champLossItems.getOrDefault(item1, 0L)+1);
+					champLossItems.put(item2, champLossItems.getOrDefault(item2, 0L)+1);
+					champLossItems.put(item3, champLossItems.getOrDefault(item3, 0L)+1);
+					champLossItems.put(item4, champLossItems.getOrDefault(item4, 0L)+1);
+					champLossItems.put(item5, champLossItems.getOrDefault(item5, 0L)+1);
 				}
+				
 			}
 			
 			Iterator<Map.Entry<String, Map<Integer,Long>[]>> iter = champion.entrySet().iterator();

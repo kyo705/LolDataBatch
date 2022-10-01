@@ -1,16 +1,18 @@
 package com.SpringBatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
@@ -32,7 +34,7 @@ import com.SpringBatch.repository.championrepository.JpaChampionRepository;
 @SpringBootTest(classes= {ChampEnemyStaticBatchConfig.class, TestBatchConfig.class, JpaChampionRepository.class})
 public class ChampEnemyStaticJobIntegrationTest {
 
-	private static final int seasonId = 22;
+	private static final int seasonId = 12;
 	
 	@Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
@@ -52,6 +54,51 @@ public class ChampEnemyStaticJobIntegrationTest {
     	matchRepository.deleteAll();
     	jpaChampionReository.deleteChampEnemysAll();
     	jobRepositoryTestUtils.removeJobExecutions();
+    }
+    
+    @DisplayName("유효하지 않은 QueueId 파라미터 job에게 전달")
+    @Test
+    public void testInvalidParameter1() throws Exception {
+    	//given
+    	JobParameters jobParameters = new JobParametersBuilder()
+    			.addLong("currentTimeStamp", System.currentTimeMillis())
+    			.addLong("queueId", 470L)
+    			.addLong("seasonId", 12L)
+    			.toJobParameters();
+    	
+    	//when&then
+    	Throwable exception = assertThrows(JobParametersInvalidException.class,()->jobLauncherTestUtils.launchJob(jobParameters));
+    	assertThat(exception.getMessage()).isEqualTo("QueueId is not invalid");
+    }
+    
+    @DisplayName("현재가 아닌 seasionId 파라미터 job에게 전달")
+    @Test
+    public void testInvalidParameter2() throws Exception {
+    	//given
+    	JobParameters jobParameters = new JobParametersBuilder()
+    			.addLong("currentTimeStamp", System.currentTimeMillis())
+    			.addLong("queueId", 420L)
+    			.addLong("seasonId", 2L)
+    			.toJobParameters();
+    	
+    	//when&then
+    	Throwable exception = assertThrows(JobParametersInvalidException.class,()->jobLauncherTestUtils.launchJob(jobParameters));
+    	assertThat(exception.getMessage()).isEqualTo("SeasonId is not currentSeasonId");
+    }
+    
+    @DisplayName("올바르지 않은 파라미터 타입 job에게 전달")
+    @Test
+    public void testInvalidParameter3() throws Exception {
+    	//given
+    	JobParameters jobParameters = new JobParametersBuilder()
+    			.addString("currentTimeStamp", "select * from table")
+    			.addLong("queueId", 470L)
+    			.addLong("seasonId", 12L)
+    			.toJobParameters();
+    	
+    	//when&then
+    	Throwable exception = assertThrows(JobParametersInvalidException.class,()->jobLauncherTestUtils.launchJob(jobParameters));
+    	assertThat(exception.getMessage()).isEqualTo("One of parameters does not match type");
     }
     
     @Test
@@ -141,6 +188,7 @@ public class ChampEnemyStaticJobIntegrationTest {
     	JobParameters jobParameters = new JobParametersBuilder()
     			.addLong("currentTimeStamp", System.currentTimeMillis())
     	    	.addLong("queueId", 420L)
+    	    	.addLong("seasonId", 12L)
     	    	.toJobParameters();
     	
     	

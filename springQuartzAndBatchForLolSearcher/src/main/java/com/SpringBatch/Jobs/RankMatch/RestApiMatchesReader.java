@@ -8,6 +8,7 @@ import org.springframework.batch.item.NonTransientResourceException;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
 
 
 
@@ -33,11 +34,16 @@ public class RestApiMatchesReader implements ItemReader<Map> {
 		Map json = null;
 		
 		if(used==false) {
-			json = webclient.get()
+			try{
+				json = webclient.get()
+			
 					.uri("https://asia.api.riotgames.com/lol/match/v5/matches/"+matchid+"?api_key="+key)
 					.retrieve()
 					.bodyToMono(Map.class)
 					.block();
+			}catch(WebClientException e) {
+				return null;
+			}
 			used = true;
 		}
 		

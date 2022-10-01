@@ -1,5 +1,6 @@
 package com.SpringBatch.Jobs.ChampItemStatic;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,13 +11,16 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.job.CompositeJobParametersValidator;
+import org.springframework.batch.core.job.DefaultJobParametersValidator;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.SpringBatch.Entity.match.Match;
+import com.SpringBatch.Entity.match.Member;
+import com.SpringBatch.paramvalidator.ChampStaticJobParamValidator;
 
 @Configuration
 public class ChampItemStataicBatchConfig {
@@ -37,47 +41,72 @@ public class ChampItemStataicBatchConfig {
 	public Job champItemStaticJob() {
 		return jbf.get("champItemStaticJob")
 				.start(champItemStaticStep())
+				.validator(champStaticParamValidator())
 				.build();
+		
 	}
 
 	@Bean
 	public Step champItemStaticStep() {
 		return sbf.get("champItemStaticStep")
-				.<Match,Match>chunk(chunckSize)
+				.<Member,Member>chunk(chunckSize)
 				.reader(ChampItemJpaPagingItemReader(null,null))
-				.writer(champItemJpaItemWriter())
+				.writer(champItemJpaItemWriter(null))
 				.build();
 	}
 	
 	@Bean
 	@StepScope
-	public JpaPagingItemReader<Match> ChampItemJpaPagingItemReader(
+	public JpaPagingItemReader<Member> ChampItemJpaPagingItemReader(
 			@Value("#{jobParameters[currentTimeStamp]}")Long currentTimeStamp,
 			@Value("#{jobParameters[queueId]}")Long queueId) {
 		
+		String query = "SELECT DISTINCT k FROM Member k inner join k.match m "
+				+ "WHERE (m.gameEndTimestamp BETWEEN :startDatetime AND :endDatetime) AND m.queueId = :queueId "
+				+ "ORDER BY k.ck DESC";
+		
 		int queueId_ = queueId.intValue();
 		Map<String, Object> parameters = new HashMap<>();
-		
 		parameters.put("startDatetime", currentTimeStamp - 1000*60*60*24 + 1);
 		parameters.put("endDatetime", currentTimeStamp);
 		parameters.put("queueId", queueId_);
 		
-		return new JpaPagingItemReaderBuilder<Match>()
+		return new JpaPagingItemReaderBuilder<Member>()
 				.name("dbChampItemReader")
 				.entityManagerFactory(emf)
 				.pageSize(chunckSize)
-				.queryString("SELECT DISTINCT m FROM Match m join fetch m.members "
-						+ "WHERE (m.gameEndTimestamp BETWEEN :startDatetime AND :endDatetime) "
-						+ "AND m.queueId = :queueId ")
+				.queryString(query)
 				.parameterValues(parameters)
 				.build();
 	}
 	
 	@Bean
-	public ChampItemJpaItemWriter champItemJpaItemWriter(){
-		ChampItemJpaItemWriter itemWriter = new ChampItemJpaItemWriter();
+	@StepScope
+	public ChampItemJpaItemWriter champItemJpaItemWriter(@Value("#{jobParameters[seasonId]}")Long seasonId){
+		
+		ChampItemJpaItemWriter itemWriter = new ChampItemJpaItemWriter(seasonId.intValue());
 		itemWriter.setEntityManagerFactory(emf);
 		
 		return itemWriter;
+	}
+	
+	@Bean
+	public CompositeJobParametersValidator champStaticParamValidator() {
+		CompositeJobParametersValidator compositeValidator = new CompositeJobParametersValidator();
+		
+		DefaultJobParametersValidator defaultValidator = 
+				new DefaultJobParametersValidator(
+						new String[] {"currentTimeStamp","queueId","seasonId"}, 
+						new String[] {});
+		
+		defaultValidator.afterPropertiesSet();
+		
+		
+		ChampStaticJobParamValidator champStaticValidator = new ChampStaticJobParamValidator();
+		
+		compositeValidator.setValidators(
+				Arrays.asList(defaultValidator, champStaticValidator));
+		
+		return compositeValidator;
 	}
 }

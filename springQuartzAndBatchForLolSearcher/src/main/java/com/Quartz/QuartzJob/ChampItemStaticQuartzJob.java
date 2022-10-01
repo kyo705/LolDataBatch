@@ -19,6 +19,9 @@ import org.springframework.context.ApplicationContext;
 public class ChampItemStaticQuartzJob implements Job {
 	private static final Logger log = LoggerFactory.getLogger(ChampItemStaticQuartzJob.class);
 	
+	private static final long queueId = 420L;
+	private static final long seasonId = 12L;
+	
 	@Autowired
 	private JobLauncher jobLauncher;
 	
@@ -34,7 +37,8 @@ public class ChampItemStaticQuartzJob implements Job {
 		
 		JobParameters jobParameters = new JobParametersBuilder()
 				.addLong("currentTimeStamp", System.currentTimeMillis())
-				.addLong("queueId", 420L)
+				.addLong("queueId", queueId)
+				.addLong("seasonId", seasonId)
 				.toJobParameters();
 		
 		try {

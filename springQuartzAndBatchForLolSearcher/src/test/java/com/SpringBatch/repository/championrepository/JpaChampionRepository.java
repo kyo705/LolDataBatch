@@ -16,7 +16,7 @@ import com.SpringBatch.Entity.Champion.ChampionItem.ChampItem;
 @Repository
 public class JpaChampionRepository implements ChampionReository {
 	
-	private static final int seasonId = 22;
+	private static final int seasonId = 12;
 	private final EntityManager em;
 	
 	public JpaChampionRepository(EntityManager em) {
