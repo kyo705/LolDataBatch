@@ -5,8 +5,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.Quartz.QuartzJob.ChampEnemyStaticQuartzJob;
-import com.Quartz.QuartzJob.ChampItemStaticQuartzJob;
 import com.Quartz.QuartzJob.ChampStaticQuartzJob;
 import com.Quartz.QuartzJob.MatchesQuartzJob;
 import com.Quartz.Timer.Timer;
@@ -33,8 +31,6 @@ public class RunningSchedulerService {
 		champStaticTimer.setRepeatIntervalMs(1000*60*60*24);
 		
 		schedulerService.schedule(ChampStaticQuartzJob.class, champStaticTimer);
-		schedulerService.schedule(ChampItemStaticQuartzJob.class, champStaticTimer);
-		schedulerService.schedule(ChampEnemyStaticQuartzJob.class, champStaticTimer);
 	}
 	
 	@PostConstruct

@@ -1,15 +1,18 @@
 package com.SpringBatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
@@ -17,11 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.SpringBatch.Entity.Champion.Champion;
+import com.SpringBatch.Entity.Champion.ChampionEnemy.ChampEnemy;
 import com.SpringBatch.Entity.match.Match;
 import com.SpringBatch.Entity.match.Member;
 import com.SpringBatch.Entity.match.MemberCompKey;
-import com.SpringBatch.Jobs.ChampStatic.ChampStaticBatchConfig;
+import com.SpringBatch.Jobs.championstatic.ChampStaticBatchConfig;
 import com.SpringBatch.repository.MatchRepository;
 import com.SpringBatch.repository.championrepository.ChampionReository;
 import com.SpringBatch.repository.championrepository.JpaChampionRepository;
@@ -30,15 +33,15 @@ import com.SpringBatch.repository.championrepository.JpaChampionRepository;
 @SpringBatchTest
 @SpringBootTest(classes= {ChampStaticBatchConfig.class, TestBatchConfig.class, JpaChampionRepository.class})
 public class ChampStaticJobIntegrationTest {
-	
-	private static final int seasonId = 22;
+
+	private static final int seasonId = 12;
 	
 	@Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
     private JobRepositoryTestUtils jobRepositoryTestUtils;
-    
+
     @Autowired
     private ChampionReository jpaChampionReository;
     
@@ -49,51 +52,96 @@ public class ChampStaticJobIntegrationTest {
     public void afterTest() throws Exception {
     	//테스트 코드에 의해 h2 DB에 생성된 데이터들을 삭제해주는 작업
     	matchRepository.deleteAll();
-    	jpaChampionReository.deleteChampsAll();
+    	jpaChampionReository.deleteChampEnemysAll();
     	jobRepositoryTestUtils.removeJobExecutions();
     }
     
+    @DisplayName("유효하지 않은 QueueId 파라미터 job에게 전달")
     @Test
-    public void testChampItemStaticJob() throws Exception {
+    public void testInvalidParameter1() throws Exception {
+    	//given
+    	JobParameters jobParameters = new JobParametersBuilder()
+    			.addLong("currentTimeStamp", System.currentTimeMillis())
+    			.addLong("queueId", 470L)
+    			.addLong("seasonId", 12L)
+    			.toJobParameters();
+    	
+    	//when&then
+    	Throwable exception = assertThrows(JobParametersInvalidException.class,()->jobLauncherTestUtils.launchJob(jobParameters));
+    	assertThat(exception.getMessage()).isEqualTo("QueueId is not invalid");
+    }
+    
+    @DisplayName("현재가 아닌 seasionId 파라미터 job에게 전달")
+    @Test
+    public void testInvalidParameter2() throws Exception {
+    	//given
+    	JobParameters jobParameters = new JobParametersBuilder()
+    			.addLong("currentTimeStamp", System.currentTimeMillis())
+    			.addLong("queueId", 420L)
+    			.addLong("seasonId", 2L)
+    			.toJobParameters();
+    	
+    	//when&then
+    	Throwable exception = assertThrows(JobParametersInvalidException.class,()->jobLauncherTestUtils.launchJob(jobParameters));
+    	assertThat(exception.getMessage()).isEqualTo("SeasonId is not currentSeasonId");
+    }
+    
+    @DisplayName("올바르지 않은 파라미터 타입 job에게 전달")
+    @Test
+    public void testInvalidParameter3() throws Exception {
+    	//given
+    	JobParameters jobParameters = new JobParametersBuilder()
+    			.addString("currentTimeStamp", "select * from table")
+    			.addLong("queueId", 470L)
+    			.addLong("seasonId", 12L)
+    			.toJobParameters();
+    	
+    	//when&then
+    	Throwable exception = assertThrows(JobParametersInvalidException.class,()->jobLauncherTestUtils.launchJob(jobParameters));
+    	assertThat(exception.getMessage()).isEqualTo("One of parameters does not match type");
+    }
+    
+    @Test
+    public void testChampEnemyStaticJob() throws Exception {
+    	
     	//given
     	Match match1 = new Match();
     	match1.setSeason(seasonId);
     	match1.setMatchId("600");
     	match1.setQueueId(420);
     	match1.setGameEndTimestamp(System.currentTimeMillis()-300);
-    	List<Member> members1 = match1.getMembers();
     	for(int i=0;i<10;i++) {
-    		members1.add(new Member());
+    		match1.getMembers().add(new Member());
     	}
     	for(int i=0;i<10;i++) {
-    		members1.get(i).setCk(new MemberCompKey(i+"300", match1.getMatchId()));
-    		members1.get(i).setMatch(match1);
+    		match1.getMembers().get(i).setCk(new MemberCompKey(i+"400", match1.getMatchId()));
+    		match1.getMembers().get(i).setMatch(match1);
     		if(i<5) 
-    			members1.get(i).setWins(true);
+    			match1.getMembers().get(i).setWins(true);
     		else 
-    			members1.get(i).setWins(false);
+    			match1.getMembers().get(i).setWins(false);
     	}
-    	members1.get(0).setChampionid("탈론");  		
-    	members1.get(1).setChampionid("그레이브즈");
-    	members1.get(2).setChampionid("카타리나");
-    	members1.get(3).setChampionid("케이틀린");
-    	members1.get(4).setChampionid("나미");
-    	members1.get(5).setChampionid("오른");
-    	members1.get(6).setChampionid("카직스");
-    	members1.get(7).setChampionid("오리아나");
-    	members1.get(8).setChampionid("징크스");
-    	members1.get(9).setChampionid("알리스타");
+    	match1.getMembers().get(0).setChampionid("탈론");  		
+    	match1.getMembers().get(1).setChampionid("그레이브즈");
+    	match1.getMembers().get(2).setChampionid("카타리나");
+    	match1.getMembers().get(3).setChampionid("케이틀린");
+    	match1.getMembers().get(4).setChampionid("나미");
+    	match1.getMembers().get(5).setChampionid("오른");
+    	match1.getMembers().get(6).setChampionid("니달리");
+    	match1.getMembers().get(7).setChampionid("제드");
+    	match1.getMembers().get(8).setChampionid("징크스");
+    	match1.getMembers().get(9).setChampionid("알리스타");
     	
-    	members1.get(0).setPositions("TOP");
-    	members1.get(1).setPositions("JUNGLE");
-    	members1.get(2).setPositions("MIDDLE");
-    	members1.get(3).setPositions("BOTTOM");
-    	members1.get(4).setPositions("UTILITY");
-    	members1.get(5).setPositions("TOP");
-    	members1.get(6).setPositions("JUNGLE");
-    	members1.get(7).setPositions("MIDDLE");
-    	members1.get(8).setPositions("BOTTOM");
-    	members1.get(9).setPositions("UTILITY");
+    	match1.getMembers().get(0).setPositions("TOP");
+    	match1.getMembers().get(1).setPositions("JUNGLE");
+    	match1.getMembers().get(2).setPositions("MIDDLE");
+    	match1.getMembers().get(3).setPositions("BOTTOM");
+    	match1.getMembers().get(4).setPositions("UTILITY");
+    	match1.getMembers().get(5).setPositions("TOP");
+    	match1.getMembers().get(6).setPositions("JUNGLE");
+    	match1.getMembers().get(7).setPositions("MIDDLE");
+    	match1.getMembers().get(8).setPositions("BOTTOM");
+    	match1.getMembers().get(9).setPositions("UTILITY");
     	
     	Match match2 = new Match();
     	match2.setSeason(seasonId);
@@ -118,8 +166,8 @@ public class ChampStaticJobIntegrationTest {
     	members2.get(3).setChampionid("케이틀린");
     	members2.get(4).setChampionid("나미");
     	members2.get(5).setChampionid("오른");
-    	members2.get(6).setChampionid("니달리");
-    	members2.get(7).setChampionid("제드");
+    	members2.get(6).setChampionid("카직스");
+    	members2.get(7).setChampionid("오리아나");
     	members2.get(8).setChampionid("징크스");
     	members2.get(9).setChampionid("알리스타");
     	
@@ -139,23 +187,23 @@ public class ChampStaticJobIntegrationTest {
     	
     	JobParameters jobParameters = new JobParametersBuilder()
     			.addLong("currentTimeStamp", System.currentTimeMillis())
-    			.addLong("queueId", 420L)
-    			.toJobParameters();
+    	    	.addLong("queueId", 420L)
+    	    	.addLong("seasonId", 12L)
+    	    	.toJobParameters();
+    	
     	
     	//when
     	JobExecution jobExecution = jobLauncherTestUtils.launchJob(jobParameters);
     	
+    	
     	//then
     	assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
-    	List<Champion> champions = jpaChampionReository.findChamps("MIDDLE");
-    	assertThat(champions.size()).isEqualTo(3); //카타리나, 오리아나, 제드 총 3명
-    	int totalWinCount = 0;
-    	int totalLossCount = 0;
-    	for(Champion champion : champions) {
-    		totalWinCount += champion.getWins();
-    		totalLossCount += champion.getLosses();
-    	}
-    	assertThat(totalWinCount-totalLossCount).isEqualTo(0);
     	
+    	List<ChampEnemy> champEnemys1 = jpaChampionReository.findChampEnemys("탈론"); //오른과 전적 2판 다 이김
+    	assertThat(champEnemys1.size()).isEqualTo(1);
+    	assertThat(champEnemys1.get(0).getCk().getChampionId()).isEqualTo("탈론");
+    	assertThat(champEnemys1.get(0).getCk().getEnemychampionId()).isEqualTo("오른");
+    	assertThat(champEnemys1.get(0).getWins()).isEqualTo(2);
+    	assertThat(champEnemys1.get(0).getLosses()).isEqualTo(0);
     }
 }

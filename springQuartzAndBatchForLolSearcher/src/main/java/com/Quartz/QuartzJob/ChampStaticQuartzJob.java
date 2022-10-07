@@ -15,9 +15,7 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
-@Component
 public class ChampStaticQuartzJob implements Job {
 	private static final Logger log = LoggerFactory.getLogger(ChampStaticQuartzJob.class);
 	
