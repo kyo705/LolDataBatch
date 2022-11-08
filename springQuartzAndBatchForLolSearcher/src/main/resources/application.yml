@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/summonersinfo?rewriteBatchedStatements=true&useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
+    url: jdbc:mariadb://localhost:3306/lolsearcherStatics?rewriteBatchedStatements=true&useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
     username: root
     password: lsk940705
   batch:
@@ -10,8 +10,10 @@ spring:
     job:
       enabled: false
   quartz:
+    job-store-type: jdbc
     jdbc:
-      initialize-schema: always
+      initialize-schema: embedded
+      comment-prefix: '#'
   jpa:
     show-sql: true
     hibernate:
