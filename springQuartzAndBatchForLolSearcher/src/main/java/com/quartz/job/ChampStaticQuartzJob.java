@@ -44,7 +44,15 @@ public class ChampStaticQuartzJob implements Job {
 		
 		try {
 			JobExecution jobExecution = jobLauncher.run(champStaticBatchJob, jobParameters);
-
+			
+			if(jobExecution.getExitStatus()==ExitStatus.STOPPED||
+					jobExecution.getExitStatus()==ExitStatus.FAILED) {
+				log.error("배치 잡 : {} 에러 발생", champStaticBatchJob.getClass().getSimpleName());
+				//배치 잡 에러사항을 email이나 문자로 관리자에게 전달하는 로직
+				
+				//에러 발생으로 쿼츠 실행 스레드 종료
+				throw new JobExecutionException();
+			}
 		} catch (BeansException | 
 				JobExecutionAlreadyRunningException | 
 				JobRestartException | 
