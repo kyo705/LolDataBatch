@@ -20,13 +20,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ChampStaticQuartzJob implements Job {
+public class ChampionQuartzJob implements Job {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	private final long queueId = 420L;
 	private final long seasonId = 12L;
 	
-	@Qualifier("champStaticJob")
+	@Qualifier("championJob")
 	@Autowired
 	private org.springframework.batch.core.Job champStaticBatchJob;
 	@Autowired
