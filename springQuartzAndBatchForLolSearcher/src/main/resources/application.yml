@@ -12,7 +12,7 @@ spring:
   quartz:
     job-store-type: jdbc
     jdbc:
-      initialize-schema: embedded
+      initialize-schema: always
       comment-prefix: '#'
   jpa:
     show-sql: true
