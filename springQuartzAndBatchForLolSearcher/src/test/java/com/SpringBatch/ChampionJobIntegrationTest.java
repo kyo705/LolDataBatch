@@ -20,7 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.SpringBatch.Entity.Champion.Champion;
 import com.SpringBatch.Entity.Champion.ChampionEnemy.ChampEnemy;
+import com.SpringBatch.Entity.Champion.ChampionItem.ChampItem;
 import com.SpringBatch.Entity.match.Match;
 import com.SpringBatch.Entity.match.Member;
 import com.SpringBatch.Entity.match.MemberCompKey;
@@ -32,19 +34,16 @@ import com.SpringBatch.repository.championrepository.JpaChampionRepository;
 @ActiveProfiles("test")
 @SpringBatchTest
 @SpringBootTest(classes= {ChampionBatchConfig.class, TestBatchConfig.class, JpaChampionRepository.class})
-public class ChampStaticJobIntegrationTest {
+public class ChampionJobIntegrationTest {
 
 	private static final int seasonId = 12;
 	
 	@Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
-
     @Autowired
     private JobRepositoryTestUtils jobRepositoryTestUtils;
-
     @Autowired
-    private ChampionReository jpaChampionReository;
-    
+    private ChampionReository jpaChampionReository; 
     @Autowired
     private MatchRepository matchRepository;
     
@@ -101,8 +100,9 @@ public class ChampStaticJobIntegrationTest {
     	assertThat(exception.getMessage()).isEqualTo("One of parameters does not match type");
     }
     
+    @DisplayName("게임 match가 2개 주어졌을 경우")
     @Test
-    public void testChampEnemyStaticJob() throws Exception {
+    public void testChampionJob() throws Exception {
     	
     	//given
     	Match match1 = new Match();
@@ -121,7 +121,10 @@ public class ChampStaticJobIntegrationTest {
     		else 
     			match1.getMembers().get(i).setWins(false);
     	}
-    	match1.getMembers().get(0).setChampionid("탈론");  		
+    	match1.getMembers().get(0).setChampionid("탈론"); 
+    	match1.getMembers().get(0).setItem0(5);
+    	match1.getMembers().get(0).setItem1(1);
+    	match1.getMembers().get(0).setItem2(2);
     	match1.getMembers().get(1).setChampionid("그레이브즈");
     	match1.getMembers().get(2).setChampionid("카타리나");
     	match1.getMembers().get(3).setChampionid("케이틀린");
@@ -160,7 +163,10 @@ public class ChampStaticJobIntegrationTest {
     		else 
     			members2.get(i).setWins(false);
     	}
-    	members2.get(0).setChampionid("탈론");  		
+    	members2.get(0).setChampionid("탈론");
+    	members2.get(0).setItem0(1);
+    	members2.get(0).setItem1(2);
+    	members2.get(0).setItem2(3);
     	members2.get(1).setChampionid("그레이브즈");
     	members2.get(2).setChampionid("카타리나");
     	members2.get(3).setChampionid("케이틀린");
@@ -199,11 +205,49 @@ public class ChampStaticJobIntegrationTest {
     	//then
     	assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.COMPLETED);
     	
-    	List<ChampEnemy> champEnemys1 = jpaChampionReository.findChampEnemys("탈론"); //오른과 전적 2판 다 이김
-    	assertThat(champEnemys1.size()).isEqualTo(1);
-    	assertThat(champEnemys1.get(0).getCk().getChampionId()).isEqualTo("탈론");
-    	assertThat(champEnemys1.get(0).getCk().getEnemychampionId()).isEqualTo("오른");
-    	assertThat(champEnemys1.get(0).getWins()).isEqualTo(2);
-    	assertThat(champEnemys1.get(0).getLosses()).isEqualTo(0);
+    	//championPosition
+    	List<Champion> champions = jpaChampionReository.findChamps("TOP");
+    	assertThat(champions.size()).isEqualTo(2);
+    	
+    	for(Champion champion : champions) {
+    		assertThat(champion.getCk().getChampionId()).isIn("오른", "탈론");
+    		
+    		if(champion.getCk().getChampionId().equals("오른")) {
+    			assertThat(champion.getWins()).isEqualTo(0);
+    			assertThat(champion.getLosses()).isEqualTo(2);
+    		}else {
+    			assertThat(champion.getWins()).isEqualTo(2);
+    			assertThat(champion.getLosses()).isEqualTo(0);
+    		}
+    	}
+    	
+    	//championItem
+    	List<ChampItem> champItems = jpaChampionReository.findChampItems("탈론");
+    	assertThat(champItems.size()).isEqualTo(4);
+    	for(ChampItem champItem : champItems) {
+    		assertThat(champItem.getCk().getItemId()).isIn(1, 2, 3, 5);
+    		if(champItem.getCk().getItemId()==1) {
+    			assertThat(champItem.getWins()).isEqualTo(2);
+    			assertThat(champItem.getLosses()).isEqualTo(0);
+    		}else if(champItem.getCk().getItemId()==2) {
+    			assertThat(champItem.getWins()).isEqualTo(2);
+    			assertThat(champItem.getLosses()).isEqualTo(0);
+    		}else if(champItem.getCk().getItemId()==3) {
+    			assertThat(champItem.getWins()).isEqualTo(1);
+    			assertThat(champItem.getLosses()).isEqualTo(0);
+    		}else {
+    			assertThat(champItem.getWins()).isEqualTo(1);
+    			assertThat(champItem.getLosses()).isEqualTo(0);
+    		}
+    	}
+    	
+    	
+    	//championEnemy
+    	List<ChampEnemy> champEnemys = jpaChampionReository.findChampEnemys("탈론"); //오른과 전적 2판 다 이김
+    	assertThat(champEnemys.size()).isEqualTo(1);
+    	assertThat(champEnemys.get(0).getCk().getChampionId()).isEqualTo("탈론");
+    	assertThat(champEnemys.get(0).getCk().getEnemychampionId()).isEqualTo("오른");
+    	assertThat(champEnemys.get(0).getWins()).isEqualTo(2);
+    	assertThat(champEnemys.get(0).getLosses()).isEqualTo(0);
     }
 }
