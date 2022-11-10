@@ -1,4 +1,4 @@
-package com.SpringBatch.Jobs.championstatic;
+package com.SpringBatch.Jobs.champion;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import com.SpringBatch.Entity.Champion.ChampionItem.ChampItem;
 import com.SpringBatch.Entity.Champion.ChampionItem.ChampItemCompKey;
 import com.SpringBatch.Entity.temporarychapion.chamionitem.TemporaryChampItem;
 
-public class SavingChampItemStaticJpaItemWriter extends JpaItemWriter<TemporaryChampItem> {
+public class SavingChampItemJpaItemWriter extends JpaItemWriter<TemporaryChampItem> {
 
 	@Override
 	protected void doWrite(EntityManager entityManager, List<? extends TemporaryChampItem> items) {

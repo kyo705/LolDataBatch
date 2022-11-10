@@ -7,13 +7,13 @@ import org.springframework.batch.core.ItemWriteListener;
 import com.SpringBatch.Entity.match.Match;
 import com.SpringBatch.exception.InvalidConditionException;
 
-public class ChampStaticItemWriterListener implements ItemWriteListener<Match> {
+public class ChampionItemWriterListener implements ItemWriteListener<Match> {
 
 	private static long timestamp;
 	private static int seasonId;
 	private static int queueId;
 	
-	public ChampStaticItemWriterListener(Long currentTimeStamp, int qid, int sid) {
+	public ChampionItemWriterListener(Long currentTimeStamp, int qid, int sid) {
 		timestamp = currentTimeStamp;
 		queueId = qid;
 		seasonId = sid;

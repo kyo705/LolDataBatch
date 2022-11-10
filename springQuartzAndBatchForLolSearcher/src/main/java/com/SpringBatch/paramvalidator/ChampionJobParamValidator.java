@@ -4,7 +4,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.JobParametersValidator;
 
-public class ChampStaticJobParamValidator implements JobParametersValidator {
+public class ChampionJobParamValidator implements JobParametersValidator {
 
 	private static final int soloRankId = 420;
 	private static final int teamRankId = 440;

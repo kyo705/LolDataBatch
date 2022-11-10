@@ -5,7 +5,7 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.ExecutionContext;
 
-public class ChampStaticStepExecutionListener implements StepExecutionListener{
+public class ChampionStepExecutionListener implements StepExecutionListener{
 
 	@Override
 	public void beforeStep(StepExecution stepExecution) {

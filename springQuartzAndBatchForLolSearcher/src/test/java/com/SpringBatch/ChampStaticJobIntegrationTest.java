@@ -24,14 +24,14 @@ import com.SpringBatch.Entity.Champion.ChampionEnemy.ChampEnemy;
 import com.SpringBatch.Entity.match.Match;
 import com.SpringBatch.Entity.match.Member;
 import com.SpringBatch.Entity.match.MemberCompKey;
-import com.SpringBatch.Jobs.championstatic.ChampStaticBatchConfig;
+import com.SpringBatch.Jobs.champion.ChampionBatchConfig;
 import com.SpringBatch.repository.MatchRepository;
 import com.SpringBatch.repository.championrepository.ChampionReository;
 import com.SpringBatch.repository.championrepository.JpaChampionRepository;
 
 @ActiveProfiles("test")
 @SpringBatchTest
-@SpringBootTest(classes= {ChampStaticBatchConfig.class, TestBatchConfig.class, JpaChampionRepository.class})
+@SpringBootTest(classes= {ChampionBatchConfig.class, TestBatchConfig.class, JpaChampionRepository.class})
 public class ChampStaticJobIntegrationTest {
 
 	private static final int seasonId = 12;
