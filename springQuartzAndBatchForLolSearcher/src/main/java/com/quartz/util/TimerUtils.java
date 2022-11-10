@@ -2,6 +2,7 @@ package com.quartz.util;
 
 import java.util.Date;
 
+import org.quartz.CronScheduleBuilder;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -12,6 +13,7 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.impl.JobDetailImpl;
 
+import com.quartz.timer.Cronner;
 import com.quartz.timer.Timer;
 
 
@@ -31,6 +33,7 @@ public final class TimerUtils {
 				.build();
 	}
 	
+	
 	public static Trigger buildTriggerWithSimpleSchedule(final Class<? extends Job> jobclass, final Timer timerInfo) {
 		SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder
 				.simpleSchedule().withIntervalInMilliseconds(timerInfo.getRepeatIntervalMs());
@@ -46,6 +49,17 @@ public final class TimerUtils {
 				.withIdentity(timerInfo.getCallbackData())
 				.withSchedule(simpleScheduleBuilder)
 				.startAt(new Date(System.currentTimeMillis()+timerInfo.getInitialOffsetMs()))
+				.build();
+	}
+	
+	
+	public static Trigger buildTriggerWithCronSchedule(final Class<? extends Job> jobclass, Cronner cronner) {
+		CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(cronner.getCronExpression());
+		
+		return TriggerBuilder
+				.newTrigger()
+				.withIdentity(cronner.getCallbackData())
+				.withSchedule(cronScheduleBuilder)
 				.build();
 	}
 }
