@@ -1,4 +1,4 @@
-package com.Quartz.Util;
+package com.quartz.util;
 
 import java.util.Date;
 
@@ -6,11 +6,13 @@ import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.quartz.impl.JobDetailImpl;
 
-import com.Quartz.Timer.Timer;
+import com.quartz.timer.Timer;
 
 
 public final class TimerUtils {
@@ -18,12 +20,13 @@ public final class TimerUtils {
 	private TimerUtils() {}
 	
 	public static JobDetail buildJobDetail(final Class<? extends Job> jobclass, final Timer timerInfo) {
-		final JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put(jobclass.getSimpleName(), timerInfo);
+		JobKey jobKey = new JobKey(timerInfo.getCallbackData());
 		
-		return JobBuilder
+		JobDataMap jobDataMap = new JobDataMap();
+		jobDataMap.put(jobKey.getName(), timerInfo);
+		return (JobDetailImpl)JobBuilder
 				.newJob(jobclass)
-				.withIdentity(jobclass.getSimpleName())
+				.withIdentity(jobKey)
 				.setJobData(jobDataMap)
 				.build();
 	}
@@ -40,7 +43,7 @@ public final class TimerUtils {
 		
 		return TriggerBuilder
 				.newTrigger()
-				.withIdentity(jobclass.getSimpleName())
+				.withIdentity(timerInfo.getCallbackData())
 				.withSchedule(simpleScheduleBuilder)
 				.startAt(new Date(System.currentTimeMillis()+timerInfo.getInitialOffsetMs()))
 				.build();

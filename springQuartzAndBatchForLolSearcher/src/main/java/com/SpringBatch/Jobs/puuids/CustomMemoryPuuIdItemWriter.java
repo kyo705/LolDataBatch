@@ -6,8 +6,8 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import com.Quartz.QuartzJob.MatchesQuartzJob;
 import com.SpringBatch.Entity.Summoner;
+import com.quartz.job.MatchesQuartzJob;
 
 public class CustomMemoryPuuIdItemWriter implements ItemWriter<Summoner> {
 

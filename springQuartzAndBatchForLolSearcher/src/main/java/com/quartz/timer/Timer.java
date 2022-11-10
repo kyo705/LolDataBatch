@@ -1,7 +1,10 @@
-package com.Quartz.Timer;
+package com.quartz.timer;
 
-public class Timer {
+import java.io.Serializable;
 
+public class Timer implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private int totalFireCount;
 	private boolean runForever;
 	private long repeatIntervalMs;
@@ -38,5 +41,4 @@ public class Timer {
 	public void setCallbackData(String callbackData) {
 		this.callbackData = callbackData;
 	}
-	
 }

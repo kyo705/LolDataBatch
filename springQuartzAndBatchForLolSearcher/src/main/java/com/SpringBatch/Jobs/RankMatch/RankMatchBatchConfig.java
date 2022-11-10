@@ -62,7 +62,7 @@ public class RankMatchBatchConfig {
 		return stepBuilderFactory.get("matchesStep")
 				.<Map,Match>chunk(new RestApiCompletionPolicy())
 				.reader(restApiMatchesReader(webClient(), null))
-				.processor(processer())
+				.processor(jsonToEntityProcesser())
 				.writer(jpaItemWriter())
 				.build();
 	}
@@ -78,7 +78,7 @@ public class RankMatchBatchConfig {
 	}
 
 	@Bean
-	public JsonToEntityItemProcessor processer() {
+	public JsonToEntityItemProcessor jsonToEntityProcesser() {
 		JsonToEntityItemProcessor itemProcessor = new JsonToEntityItemProcessor();
 		return itemProcessor;
 	}

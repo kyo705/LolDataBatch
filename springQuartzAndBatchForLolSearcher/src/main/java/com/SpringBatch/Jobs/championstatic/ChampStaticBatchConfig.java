@@ -17,6 +17,7 @@ import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,12 +33,13 @@ import com.SpringBatch.paramvalidator.ChampStaticJobParamValidator;
 
 @Configuration
 public class ChampStaticBatchConfig {
-
+	private final int chunkSize = 200;
+	private final String champStaticJobName = "champStaticJob";
+	private final String champStaticStepName = "champStaticStep";
+	
 	EntityManagerFactory emf;
 	JobBuilderFactory jbf;
 	StepBuilderFactory sbf;
-	
-	private static final int chunkSize = 200;
 
 	public ChampStaticBatchConfig(EntityManagerFactory emf, 
 			JobBuilderFactory jbf, 
@@ -47,21 +49,22 @@ public class ChampStaticBatchConfig {
 		this.sbf = sbf;
 	}
 	
+	@Qualifier("champStaticJob")
 	@Bean
 	public Job champStaticJob() {
-		return jbf.get("champStaticJob")
+		return jbf.get(champStaticJobName)
 				.validator(champStaticParamValidator()) 
 				.start(champStaticStep1())   //통계 데이터 임시 저장소에 저장
 				.on("STOPPED").stopAndRestart(champStaticStep1())
 				.from(champStaticStep1())
-				.on("*").to(parallelFlow()) //기존 데이터와 신규 데이터를 통합
+				.on("*").to(integrationParallelFlow()) //기존 데이터와 신규 데이터를 통합
 				.end()
 				.build();
 	}
 	
 	@Bean
 	public Step champStaticStep1() {
-		return sbf.get("champStaticStep")
+		return sbf.get(champStaticStepName)
 				.<Match,Match>chunk(chunkSize)
 				.reader(champStaticJpaPagingItemReader(null, null, null))
 				.writer(champStaticJpaItemWriter())
@@ -142,7 +145,7 @@ public class ChampStaticBatchConfig {
 	}
 
 	@Bean
-	public Flow parallelFlow() {
+	public Flow integrationParallelFlow() {
 		return new FlowBuilder<Flow>("parallelFlow")
 				.start(champStaticFlow())
 				.split(new SimpleAsyncTaskExecutor())
@@ -155,7 +158,7 @@ public class ChampStaticBatchConfig {
 	@Bean
 	public Flow champStaticFlow() {
 		return new FlowBuilder<Flow>("champStaticFlow")
-				.start(savingChampStaticStep())
+				.start(savingChampPositionStaticStep())
 				.build();
 	}
 	
@@ -175,7 +178,7 @@ public class ChampStaticBatchConfig {
 
 	
 	@Bean
-	public Step savingChampStaticStep() {
+	public Step savingChampPositionStaticStep() {
 		return sbf.get("savingChampStaticStep")
 				.<TemporaryChampion, TemporaryChampion>chunk(chunkSize)
 				.reader(savingChampStaticJpaPagingItemReader())

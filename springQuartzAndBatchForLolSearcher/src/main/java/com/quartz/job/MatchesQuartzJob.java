@@ -1,4 +1,4 @@
-package com.Quartz.QuartzJob;
+package com.quartz.job;
 
 import java.util.Iterator;
 import java.util.Map;

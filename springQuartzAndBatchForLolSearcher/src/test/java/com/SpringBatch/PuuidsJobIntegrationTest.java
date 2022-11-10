@@ -16,13 +16,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.Quartz.QuartzJob.MatchesQuartzJob;
 import com.SpringBatch.Entity.Summoner;
 import com.SpringBatch.Entity.rank.Rank;
 import com.SpringBatch.Entity.rank.RankCompKey;
 import com.SpringBatch.Jobs.puuids.PuuidsBatchConfig;
 import com.SpringBatch.repository.RankRepository;
 import com.SpringBatch.repository.SummonerRepository;
+import com.quartz.job.MatchesQuartzJob;
 
 @ActiveProfiles("test")
 @SpringBatchTest

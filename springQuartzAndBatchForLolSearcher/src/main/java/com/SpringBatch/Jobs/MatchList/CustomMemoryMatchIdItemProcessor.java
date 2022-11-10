@@ -7,7 +7,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import com.Quartz.QuartzJob.MatchesQuartzJob;
+import com.quartz.job.MatchesQuartzJob;
 
 public class CustomMemoryMatchIdItemProcessor implements ItemProcessor<List<String>, String> {
 

@@ -31,7 +31,7 @@ private static final int chunksize = 100;
 	}
 	
 	@Bean
-	public Job puuidsJob() {
+	public Job puuIdsJob() {
 		return jobBuilderFactory.get("puuIdsJob")
 				.start(puuidsStep())
 				.build();

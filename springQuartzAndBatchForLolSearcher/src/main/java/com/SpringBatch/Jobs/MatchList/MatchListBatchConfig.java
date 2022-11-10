@@ -26,20 +26,16 @@ public class MatchListBatchConfig {
 	
 	private final EntityManagerFactory entityManagerFactory;
 	
-	private final WebClient.Builder webclientBuilder;
+	private final WebClient webclient;
 	
 	public MatchListBatchConfig(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory,
-			EntityManagerFactory entityManagerFactory, WebClient.Builder webclientBuilder) {
+			EntityManagerFactory entityManagerFactory, WebClient webclient) {
 		this.jobBuilderFactory = jobBuilderFactory;
 		this.stepBuilderFactory = stepBuilderFactory;
 		this.entityManagerFactory = entityManagerFactory;
-		this.webclientBuilder = webclientBuilder;
+		this.webclient = webclient;
 	}
 	
-	@Bean
-	public WebClient webClient() {
-		return webclientBuilder.build();
-	}
 	
 	@Bean
 	public Job matchListJob() {
@@ -53,15 +49,15 @@ public class MatchListBatchConfig {
 	public Step matchListStep() {
 		return stepBuilderFactory.get("matchListStep")
 				.<List<String>,String>chunk(chunksize)
-				.reader(restApiMatchesReader(webClient(), null))
-				.processor(processer(null))
+				.reader(restApiMatchListReader(webclient, null))
+				.processor(customMemoryProcesser(null))
 				.writer(customJpaItemWriter(null))
 				.build();
 	}
 	
 	@Bean
 	@StepScope
-	public RestApiMatchListReader restApiMatchesReader(WebClient webClient,
+	public RestApiMatchListReader restApiMatchListReader(WebClient webClient,
 			@Value("#{jobParameters[puuId]}")String puuId) {
 		
 		RestApiMatchListReader reader = new RestApiMatchListReader(webClient, puuId);
@@ -71,7 +67,7 @@ public class MatchListBatchConfig {
 	
 	@Bean
 	@StepScope
-	public CustomMemoryMatchIdItemProcessor processer(
+	public CustomMemoryMatchIdItemProcessor customMemoryProcesser(
 			@Value("#{jobParameters[lastMatchId]}")String lastMatchId) {
 		return new CustomMemoryMatchIdItemProcessor(lastMatchId);
 	}
